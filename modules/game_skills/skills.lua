@@ -426,6 +426,10 @@ function onBaseMagicLevelChange(localPlayer, baseMagicLevel)
 end
 
 function onSkillChange(localPlayer, id, level, percent)
+  if HiddenSkills and HiddenSkills[id] then
+    return
+  end
+  
   setSkillValue('skillId' .. id, level)
   setSkillPercent('skillId' .. id, percent, tr('You have %s percent to go', 100 - percent))
 
@@ -433,5 +437,9 @@ function onSkillChange(localPlayer, id, level, percent)
 end
 
 function onBaseSkillChange(localPlayer, id, baseLevel)
+  if HiddenSkills and HiddenSkills[id] then
+    return
+  end
+  
   setSkillBase('skillId'..id, localPlayer:getSkillLevel(id), baseLevel)
 end

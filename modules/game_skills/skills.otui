@@ -129,12 +129,14 @@ MiniWindow
     SkillButton
       id: skillId0
       SkillNameLabel
-        !text: tr('Fist Fighting')
+        !text: tr('Melee')
       SkillValueLabel
       SkillPercentPanel
 
     SkillButton
       id: skillId1
+      visible: false
+      height: 0
       SkillNameLabel
         !text: tr('Club Fighting')
       SkillValueLabel
@@ -142,6 +144,8 @@ MiniWindow
 
     SkillButton
       id: skillId2
+      visible: false
+      height: 0
       SkillNameLabel
         !text: tr('Sword Fighting')
       SkillValueLabel
@@ -149,6 +153,8 @@ MiniWindow
 
     SkillButton
       id: skillId3
+      visible: false
+      height: 0
       SkillNameLabel
         !text: tr('Axe Fighting')
       SkillValueLabel

@@ -61,6 +61,22 @@ Skill = {
   ManaLeechAmount = 12
 }
 
+HiddenSkills = {
+  [1] = true,
+  [2] = true,
+  [3] = true
+}
+
+SkillNames = {
+  [0] = "Melee",
+  [1] = "Melee",
+  [2] = "Melee",
+  [3] = "Melee",
+  [4] = "Distance",
+  [5] = "Shielding",
+  [6] = "Fishing"
+}
+
 North = Directions.North
 East = Directions.East
 South = Directions.South
