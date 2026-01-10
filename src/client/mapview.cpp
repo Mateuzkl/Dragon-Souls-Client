@@ -213,8 +213,17 @@ void MapView::drawFloor(short floor, const Position& cameraPosition, const TileP
                                              m_crosshair, Rect(0, 0, m_crosshair->getSize()));
             }
 
-            tile->drawCreatures(tileDrawPos, m_lightView.get());
+            if (!g_game.getFeature(Otc::GameNegativeOffset)) {
+                tile->drawCreatures(tileDrawPos, m_lightView.get());
+            }
             tile->drawTop(tileDrawPos, m_lightView.get());
+        }
+        // draw creatures after all tiles when GameNegativeOffset is enabled
+        if (g_game.getFeature(Otc::GameNegativeOffset)) {
+            for (auto& tile : tiles) {
+                Point tileDrawPos = transformPositionTo2D(tile->getPosition(), cameraPosition);
+                tile->drawCreatures(tileDrawPos, m_lightView.get());
+            }
         }
     } else {
         // ground, bottom, creatures, top
@@ -237,8 +246,17 @@ void MapView::drawFloor(short floor, const Position& cameraPosition, const TileP
                                              m_crosshair, Rect(0, 0, m_crosshair->getSize()));
             }
 
-            tile->drawCreatures(tileDrawPos, m_lightView.get());
+            if (!g_game.getFeature(Otc::GameNegativeOffset)) {
+                tile->drawCreatures(tileDrawPos, m_lightView.get());
+            }
             tile->drawTop(tileDrawPos, m_lightView.get());
+        }
+        // draw creatures after all tiles when GameNegativeOffset is enabled
+        if (g_game.getFeature(Otc::GameNegativeOffset)) {
+            for (auto& tile : tiles) {
+                Point tileDrawPos = transformPositionTo2D(tile->getPosition(), cameraPosition);
+                tile->drawCreatures(tileDrawPos, m_lightView.get());
+            }
         }
     }
 

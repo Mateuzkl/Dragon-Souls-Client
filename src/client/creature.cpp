@@ -541,6 +541,7 @@ void Creature::updateWalkingTile()
 {
     // determine new walking tile
     TilePtr newWalkingTile;
+
     Rect virtualCreatureRect(g_sprites.spriteSize() + (m_walkOffset.x - getDisplacementX()),
         g_sprites.spriteSize() + (m_walkOffset.y - getDisplacementY()),
         g_sprites.spriteSize(), g_sprites.spriteSize());
@@ -941,6 +942,9 @@ uint16 Creature::getStepDuration(bool ignoreDiagonal, Otc::Direction dir)
 
 Point Creature::getDisplacement()
 {
+    if (g_game.getFeature(Otc::GameNegativeOffset))
+        return Point(0, 0);
+
     if (m_outfit.getCategory() == ThingCategoryEffect)
         return Point(8, 8) * g_sprites.getOffsetFactor();
     else if (m_outfit.getCategory() == ThingCategoryItem)
@@ -956,6 +960,9 @@ Point Creature::getDisplacement()
 
 int Creature::getDisplacementX()
 {
+    if (g_game.getFeature(Otc::GameNegativeOffset))
+        return 0;
+
     if (m_outfit.getCategory() == ThingCategoryEffect)
         return 8 * g_sprites.getOffsetFactor();
     else if (m_outfit.getCategory() == ThingCategoryItem)
@@ -971,6 +978,9 @@ int Creature::getDisplacementX()
 
 int Creature::getDisplacementY()
 {
+    if (g_game.getFeature(Otc::GameNegativeOffset))
+        return 0;
+
     if (m_outfit.getCategory() == ThingCategoryEffect)
         return 8 * g_sprites.getOffsetFactor();
     else if (m_outfit.getCategory() == ThingCategoryItem)
