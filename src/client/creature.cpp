@@ -62,6 +62,7 @@ Creature::Creature() : Thing()
     m_emblem = Otc::EmblemNone;
     m_type = Proto::CreatureTypeUnknown;
     m_icon = Otc::NpcIconNone;
+    m_level = 0;
     m_lastStepDirection = Otc::InvalidDirection;
     m_footLastStep = 0;
     m_nameCache.setFont(g_fonts.getFont("verdana-11px-rounded"));
@@ -645,8 +646,8 @@ void Creature::terminateWalk()
 
 void Creature::setName(const std::string& name)
 {
-    m_nameCache.setText(name);
     m_name = name;
+    m_nameCache.setText(m_name);
 }
 
 void Creature::setHealthPercent(uint8 healthPercent)
@@ -784,6 +785,11 @@ void Creature::setIcon(uint8 icon)
 {
     m_icon = icon;
     callLuaField("onIconChange", m_icon);
+}
+
+void Creature::setLevel(uint16 level)
+{
+    m_level = level;
 }
 
 void Creature::setSkullTexture(const std::string& filename)

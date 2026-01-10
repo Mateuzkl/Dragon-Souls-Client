@@ -75,6 +75,8 @@ public:
     void setIconTexture(const std::string& filename);
     void setPassable(bool passable) { m_passable = passable; }
     void setSpeedFormula(double speedA, double speedB, double speedC);
+    void setLevel(uint16 level);
+    uint16 getLevel() { return m_level; }
 
     void addTimedSquare(uint8 color);
     void removeTimedSquare() { m_showTimedSquare = false; }
@@ -224,6 +226,7 @@ protected:
     uint8 m_emblem;
     uint8 m_type;
     uint8 m_icon;
+    uint16 m_level;
     TexturePtr m_skullTexture;
     TexturePtr m_shieldTexture;
     TexturePtr m_emblemTexture;

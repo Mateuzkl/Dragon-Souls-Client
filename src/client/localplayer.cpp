@@ -531,6 +531,8 @@ void LocalPlayer::setLevel(double level, double levelPercent)
         m_level = level;
         m_levelPercent = levelPercent;
 
+        Creature::setLevel((uint16)level);
+
         callLuaField("onLevelChange", level, levelPercent, oldLevel, oldLevelPercent);
     }
 }
