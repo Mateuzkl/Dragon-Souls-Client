@@ -66,7 +66,9 @@ public:
     void calculateCorpseCorrection();
 
     void drawGround(const Point& dest, LightView* lightView = nullptr);
+    void drawBottomShadows(const Point& dest);
     void drawBottom(const Point& dest, LightView* lightView = nullptr);
+    void drawCreatureShadows(const Point& dest);
     void drawCreatures(const Point& dest, LightView* lightView = nullptr);
     void drawTop(const Point& dest, LightView* lightView = nullptr);
     void drawTexts(Point dest);

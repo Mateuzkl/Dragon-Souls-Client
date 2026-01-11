@@ -83,22 +83,24 @@ void Item::draw(const Point& dest, bool animate, LightView* lightView)
     if (m_clientId == 0)
         return;
 
-    // determine animation phase
     int animationPhase = calculateAnimationPhase(animate);
 
-    // determine x,y,z patterns
     int xPattern = 0, yPattern = 0, zPattern = 0;
     calculatePatterns(xPattern, yPattern, zPattern);
 
     Color color(Color::white);
     if (m_color != Color::alpha)
         color = m_color;
+
+    auto thingType = rawGetThingType();
+    bool shouldDrawShadow = thingType && !thingType->isGround() && !thingType->isGroundBorder() && !thingType->isFullGround();
+
     size_t drawQueueSize = g_drawQueue->size();
     if (!m_shader.empty()) {
-        rawGetThingType()->drawWithShader(dest, 0, xPattern, yPattern, zPattern, animationPhase, m_shader, color, lightView);
+        thingType->drawWithShader(dest, 0, xPattern, yPattern, zPattern, animationPhase, m_shader, color, lightView);
     }
     else {
-        rawGetThingType()->draw(dest, 0, xPattern, yPattern, zPattern, animationPhase, color, lightView);
+        thingType->draw(dest, 0, xPattern, yPattern, zPattern, animationPhase, color, lightView, shouldDrawShadow);
     }
     if (m_marked) {
         g_drawQueue->setMark(drawQueueSize, updatedMarkedColor());
@@ -110,10 +112,8 @@ void Item::draw(const Rect& dest, bool animate)
     if (m_clientId == 0)
         return;
 
-    // determine animation phase
     int animationPhase = calculateAnimationPhase(animate);
 
-    // determine x,y,z patterns
     int xPattern = 0, yPattern = 0, zPattern = 0;
     calculatePatterns(xPattern, yPattern, zPattern);
 
@@ -127,6 +127,26 @@ void Item::draw(const Rect& dest, bool animate)
     else {
         rawGetThingType()->draw(dest, 0, xPattern, yPattern, zPattern, animationPhase, color);
     }
+}
+
+void Item::drawShadow(const Point& dest, bool animate)
+{
+    if (m_clientId == 0)
+        return;
+
+    auto thingType = rawGetThingType();
+    if (!thingType)
+        return;
+
+    if (thingType->isGround() || thingType->isGroundBorder() || thingType->isFullGround())
+        return;
+
+    int animationPhase = calculateAnimationPhase(animate);
+
+    int xPattern = 0, yPattern = 0, zPattern = 0;
+    calculatePatterns(xPattern, yPattern, zPattern);
+
+    thingType->drawShadow(dest, 0, xPattern, yPattern, zPattern, animationPhase);
 }
 
 void Item::setId(uint32 id)

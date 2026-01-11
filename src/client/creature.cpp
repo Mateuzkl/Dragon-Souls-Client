@@ -80,6 +80,20 @@ Creature::~Creature()
     g_stats.removeCreature();
 }
 
+void Creature::drawShadow(const Point& dest, bool animate)
+{
+    if (!canBeSeen())
+        return;
+
+    Point jumpOffset = Point(m_jumpOffset.x, m_jumpOffset.y);
+    Point animationOffset = animate ? m_walkOffset : Point(0, 0);
+
+    if (m_outfit.getCategory() != ThingCategoryCreature)
+        animationOffset -= getDisplacement();
+
+    m_outfit.drawShadow(dest - jumpOffset + animationOffset, m_walking ? m_walkDirection : m_direction, m_walkAnimationPhase, animate);
+}
+
 void Creature::draw(const Point& dest, bool animate, LightView* lightView)
 {   
     if (!canBeSeen())

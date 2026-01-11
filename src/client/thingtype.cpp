@@ -510,7 +510,7 @@ void ThingType::unload()
     m_loaded = false;
 }
 
-DrawQueueItem* ThingType::draw(const Point& dest, int layer, int xPattern, int yPattern, int zPattern, int animationPhase, Color color, LightView* lightView)
+DrawQueueItem* ThingType::draw(const Point& dest, int layer, int xPattern, int yPattern, int zPattern, int animationPhase, Color color, LightView* lightView, bool drawShadow)
 {
     if (m_null)
         return nullptr;
@@ -518,7 +518,7 @@ DrawQueueItem* ThingType::draw(const Point& dest, int layer, int xPattern, int y
     if (animationPhase < 0 || animationPhase >= m_animationPhases)
         return nullptr;
 
-    const TexturePtr& texture = getTexture(animationPhase); // texture might not exists, neither its rects.
+    const TexturePtr& texture = getTexture(animationPhase);
     if (!texture)
         return nullptr;
 
@@ -531,12 +531,30 @@ DrawQueueItem* ThingType::draw(const Point& dest, int layer, int xPattern, int y
 
     Rect screenRect(dest + (textureOffset - m_displacement * g_sprites.getOffsetFactor() - (m_size.toPoint() - Point(1, 1)) * g_sprites.spriteSize()), textureRect.size());
 
-    bool useOpacity = m_opacity < 1.0f;
-    if (useOpacity)
+    if (m_opacity < 1.0f)
         color.setAlpha(m_opacity);
 
     if (lightView && hasLight())
         lightView->addLight(screenRect.center(), getLight());
+
+    if (drawShadow && 
+        (m_category == ThingCategoryCreature || m_id > 100) &&
+        !isOnBottom() && !isGround() && !isGroundBorder() && !isFullGround() &&
+        screenRect.height() >= 8)
+    {
+        const float SHADOW_SCALE_Y = 0.25f;
+        int shadowHeight = static_cast<int>(screenRect.height() * SHADOW_SCALE_Y);
+
+        Rect shadowRect(
+            screenRect.left(),
+            screenRect.bottom() - shadowHeight,
+            screenRect.width(),
+            shadowHeight
+        );
+
+        Color shadowColor(0, 0, 0, 78);
+        g_drawQueue->addTexturedRect(shadowRect, texture, textureRect, shadowColor);
+    }
 
     return g_drawQueue->addTexturedRect(screenRect, texture, textureRect, color);
 }
@@ -578,6 +596,44 @@ DrawQueueItem* ThingType::draw(const Rect& dest, int layer, int xPattern, int yP
 
     float scale = std::min<float>((float)dest.width() / size.width(), (float)dest.height() / size.height());
     return g_drawQueue->addTexturedRect(Rect(dest.topLeft() + (textureOffset * scale), textureRect.size() * scale), texture, textureRect, color);
+}
+
+void ThingType::drawShadow(const Point& dest, int layer, int xPattern, int yPattern, int zPattern, int animationPhase)
+{
+    if (m_null)
+        return;
+
+    if (animationPhase < 0 || animationPhase >= m_animationPhases)
+        return;
+
+    const TexturePtr& texture = getTexture(animationPhase);
+    if (!texture)
+        return;
+
+    uint frameIndex = getTextureIndex(layer, xPattern, yPattern, zPattern);
+    if (frameIndex >= m_texturesFramesRects[animationPhase].size())
+        return;
+
+    Point textureOffset = m_texturesFramesOffsets[animationPhase][frameIndex];
+    Rect textureRect = m_texturesFramesRects[animationPhase][frameIndex];
+
+    Rect screenRect(dest + (textureOffset - m_displacement * g_sprites.getOffsetFactor() - (m_size.toPoint() - Point(1, 1)) * g_sprites.spriteSize()), textureRect.size());
+
+    if (screenRect.height() < 8)
+        return;
+
+    const float SHADOW_SCALE_Y = 0.25f;
+    int shadowHeight = static_cast<int>(screenRect.height() * SHADOW_SCALE_Y);
+
+    Rect shadowRect(
+        screenRect.left(),
+        screenRect.bottom() - shadowHeight,
+        screenRect.width(),
+        shadowHeight
+    );
+
+    Color shadowColor(32, 32, 32, 128);
+    g_drawQueue->addTexturedRect(shadowRect, texture, textureRect, shadowColor);
 }
 
 std::shared_ptr<DrawOutfitParams> ThingType::drawOutfit(const Point& dest, int maskLayer, int xPattern, int yPattern, int zPattern, int animationPhase, Color color, LightView* lightView)

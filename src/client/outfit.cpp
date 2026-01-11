@@ -163,10 +163,10 @@ void Outfit::draw(Point dest, Otc::Direction direction, uint walkAnimationPhase,
                 auto boneOffset = Point((outfitBones.x - mountBones.x) + bonusOffset, (outfitBones.y - mountBones.y) + bonusOffset);
 
                 mountDest = dest + boneOffset * g_sprites.getOffsetFactor();
-                mountType->draw(mountDest, 0, direction, 0, 0, mountAnimationPhase, Color::white, lightView);
+                mountType->draw(mountDest, 0, direction, 0, 0, mountAnimationPhase, Color::white, lightView, true);
             }
             else {
-                mountType->draw(dest, 0, direction, 0, 0, mountAnimationPhase, Color::white, lightView);
+                mountType->draw(dest, 0, direction, 0, 0, mountAnimationPhase, Color::white, lightView, true);
             }
             dest += type->getDisplacement() * g_sprites.getOffsetFactor();
         }
@@ -250,6 +250,22 @@ void Outfit::draw(Point dest, Otc::Direction direction, uint walkAnimationPhase,
     if (m_aura && (!g_game.getFeature(Otc::GameDrawAuraOnTop) or g_game.getFeature(Otc::GameAuraFrontAndBack)) ) {
         drawAura();
     }
+
+    if (type->getLayers() > 1) {
+        std::shared_ptr<DrawOutfitParams> shadowParams = type->drawOutfit(dest, 1, direction, 0, zPattern, animationPhase, Color::white, nullptr);
+        if (shadowParams && shadowParams->dest.height() >= 8) {
+            const float SHADOW_SCALE_Y = 0.25f;
+            int shadowHeight = static_cast<int>(shadowParams->dest.height() * SHADOW_SCALE_Y);
+            Rect shadowRect(
+                shadowParams->dest.left(),
+                shadowParams->dest.bottom() - shadowHeight,
+                shadowParams->dest.width(),
+                shadowHeight
+            );
+            Color shadowColor(0, 0, 0, 78);
+            g_drawQueue->addTexturedRect(shadowRect, shadowParams->texture, shadowParams->src, shadowColor);
+        }
+    }
   
     drawMount();
 
@@ -307,7 +323,7 @@ void Outfit::draw(Point dest, Otc::Direction direction, uint walkAnimationPhase,
                 g_drawQueue->add(outfit);
                 continue;
             }
-            type->draw(dest, 0, direction, yPattern, zPattern, animationPhase, Color::white, lightView);
+            type->draw(dest, 0, direction, yPattern, zPattern, animationPhase, Color::white, lightView, true);
             continue;
         }
 
@@ -384,6 +400,70 @@ void Outfit::draw(const Rect& dest, Otc::Direction direction, uint animationPhas
     int size = g_drawQueue->size();
     draw(Point(0, 0), direction, animationPhase, animate, nullptr, ui);
     g_drawQueue->correctOutfit(dest, size, oldScaling, m_center);
+}
+
+void Outfit::drawShadow(Point dest, Otc::Direction direction, uint walkAnimationPhase, bool animate)
+{
+    if (m_category != ThingCategoryCreature)
+        return;
+    
+    if (direction == Otc::NorthEast || direction == Otc::SouthEast)
+        direction = Otc::East;
+    else if (direction == Otc::NorthWest || direction == Otc::SouthWest)
+        direction = Otc::West;
+
+    auto type = g_things.rawGetThingType(m_category == ThingCategoryCreature ? m_id : m_auxId, m_category);
+    if (!type) return;
+
+    if (g_game.getFeature(Otc::GameCenteredOutfits)) {
+        dest.x += ((type->getWidth() - 1) * (g_sprites.spriteSize() / 2));
+    }
+
+    int animationPhase = walkAnimationPhase;
+
+    if (animate && m_category == ThingCategoryCreature) {
+        auto idleAnimator = type->getIdleAnimator();
+        if (idleAnimator) {
+            if (walkAnimationPhase > 0) {
+                animationPhase += idleAnimator->getAnimationPhases() - 1;
+            } else {
+                animationPhase = idleAnimator->getPhase();
+            }
+        } else if (type->isAnimateAlways()) {
+            int phases = type->getAnimator() ? type->getAnimator()->getAnimationPhases() : type->getAnimationPhases();
+            int ticksPerFrame = !g_game.getFeature(Otc::GameEnhancedAnimations) ? 333 : (1000 / phases);
+            animationPhase = (g_clock.millis() % (ticksPerFrame * phases)) / ticksPerFrame;
+            if (idleAnimator) {
+                animationPhase += idleAnimator->getAnimationPhases() - 1;
+            }
+        }
+    }
+
+    int zPattern = m_mount > 0 ? std::min<int>(1, type->getNumPatternZ() - 1) : 0;
+
+    if (zPattern > 0) {
+        int mountAnimationPhase = walkAnimationPhase;
+        auto mountType = g_things.rawGetThingType(m_mount, ThingCategoryCreature);
+        if (mountType) {
+            auto idleAnimator = mountType->getIdleAnimator();
+            if (idleAnimator && animate) {
+                if (walkAnimationPhase > 0) {
+                    mountAnimationPhase += idleAnimator->getAnimationPhases() - 1;
+                } else {
+                    mountAnimationPhase = idleAnimator->getPhase();
+                }
+            }
+            Point mountDest = dest - mountType->getDisplacement() * g_sprites.getOffsetFactor();
+            mountType->drawShadow(mountDest, 0, direction, 0, 0, mountAnimationPhase);
+        }
+    }
+
+    for (int yPattern = 0; yPattern < type->getNumPatternY(); yPattern++) {
+        if (yPattern > 0 && !(getAddons() & (1 << (yPattern - 1)))) {
+            continue;
+        }
+        type->drawShadow(dest, 0, direction, yPattern, zPattern, animationPhase);
+    }
 }
 
 void Outfit::resetClothes()

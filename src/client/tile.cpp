@@ -51,7 +51,6 @@ void Tile::drawGround(const Point& dest, LightView* lightView)
         return;
     }
 
-    // ground
     for (const ThingPtr& thing : m_things) {
         if (!thing->isGround() && !thing->isGroundBorder() && (g_game.getFeature(Otc::GameMapDrawGroundFirst) || !thing->isOnBottom()))
             break;
@@ -61,6 +60,44 @@ void Tile::drawGround(const Point& dest, LightView* lightView)
         thing->draw(dest - m_drawElevation * g_sprites.getOffsetFactor(), true, lightView);
         m_drawElevation = std::min<uint8_t>(m_drawElevation + thing->getElevation(), Otc::MAX_ELEVATION);
     }
+}
+
+void Tile::drawBottomShadows(const Point& dest)
+{
+    if (m_fill != Color::alpha)
+        return;
+
+    uint8_t savedElevation = m_drawElevation;
+
+    if (g_game.getFeature(Otc::GameMapDrawGroundFirst)) {
+        bool afterBottom = false;
+        for (const ThingPtr& thing : m_things) {
+            if (thing->isOnBottom())
+                afterBottom = true;
+            if (!thing->isGround() && !thing->isGroundBorder() && !thing->isOnBottom())
+                break;
+            if (thing->isHidden() || !afterBottom)
+                continue;
+
+            thing->drawShadow(dest - m_drawElevation * g_sprites.getOffsetFactor(), true);
+        }
+    }
+
+    bool stopDrawing = false;
+    for (auto it = m_things.rbegin(); it != m_things.rend(); ++it) {
+        const ThingPtr& thing = *it;
+        if (thing->isOnTop() || thing->isOnBottom() || thing->isGroundBorder() || thing->isGround() || thing->isCreature())
+            stopDrawing = true;
+
+        if (stopDrawing)
+            continue;
+        if (thing->isHidden())
+            continue;
+
+        thing->drawShadow(dest - m_drawElevation * g_sprites.getOffsetFactor(), true);
+    }
+
+    m_drawElevation = savedElevation;
 }
 
 void Tile::drawBottom(const Point& dest, LightView* lightView)
@@ -123,6 +160,32 @@ void Tile::drawBottom(const Point& dest, LightView* lightView)
     }
 }
 
+void Tile::drawCreatureShadows(const Point& dest)
+{
+    if (m_fill != Color::alpha)
+        return;
+
+    for (const CreaturePtr& creature : m_walkingCreatures) {
+        if (creature->isHidden())
+            continue;
+        Point creatureDest(dest.x + ((creature->getPrewalkingPosition().x - m_position.x) * g_sprites.spriteSize() - m_drawElevation * g_sprites.getOffsetFactor()),
+                           dest.y + ((creature->getPrewalkingPosition().y - m_position.y) * g_sprites.spriteSize() - m_drawElevation * g_sprites.getOffsetFactor()));
+        creature->drawShadow(creatureDest, true);
+    }
+
+    int limit = g_adaptiveRenderer.creaturesLimit();
+    for (auto& thing : m_things) {
+        if (!thing->isCreature() || thing->isHidden())
+            continue;
+        if (limit-- <= 0)
+            break;
+        CreaturePtr creature = thing->static_self_cast<Creature>();
+        if (!creature || creature->isWalking())
+            continue;
+        creature->drawShadow(dest - m_drawElevation * g_sprites.getOffsetFactor(), true);
+    }
+}
+
 void Tile::drawCreatures(const Point& dest, LightView* lightView)
 {
     if (m_fill != Color::alpha)
@@ -140,7 +203,6 @@ void Tile::drawCreatures(const Point& dest, LightView* lightView)
     }
 
     // creatures
-    std::vector<CreaturePtr> creaturesToDraw;
     int limit = g_adaptiveRenderer.creaturesLimit();
     for (auto& thing : m_things) {
         if (!thing->isCreature() || thing->isHidden())
