@@ -38,6 +38,18 @@ TopToggleButton < UIButton
   $disabled:
     image-color: #ffffff44
     icon-color: #ffffff44
+
+MainToggleButton < UIButton
+  size: 20 20
+  image-source: /images/options/button_empty
+  image-clip: 0 0 20 20
+  image-border: 3
+
+  $pressed:
+    image-clip: 20 0 20 20
+
+  $on:
+    image-clip: 20 0 20 20
     
 TopMenuButtonsPanel < Panel
   layout:

@@ -49,10 +49,17 @@ end
 function initialize()
     g_ui.importStyle('imbuementtracker')
     connect(g_game, {
-        onGameStart = onGameStart,
-        onGameEnd = onGameEnd,
+        onGameStart = check,
+        onGameEnd = hide,
         onUpdateImbuementTracker = onUpdateImbuementTracker
     })
+    
+    -- Create the window during initialization
+    createImbuementTrackerWindow()
+    
+    if g_game.isOnline() then
+        check()
+    end
 end
 
 function createImbuementTrackerWindow()
@@ -141,8 +148,8 @@ end
 
 function terminate()
     disconnect(g_game, {
-        onGameStart = onGameStart,
-        onGameEnd = onGameEnd,
+        onGameStart = check,
+        onGameEnd = hide,
         onUpdateImbuementTracker = onUpdateImbuementTracker
     })
 
@@ -171,7 +178,6 @@ function toggle()
         end
         imbuementTracker:open()
         imbuementTrackerButton:setOn(true)
-        -- updateHeight()
     end
     g_game.imbuementDurations(imbuementTrackerButton:isOn())
 end
@@ -285,24 +291,30 @@ function onUpdateImbuementTracker(items)
     end
 end
 
-function onGameStart()
-    if g_game.getClientVersion() >= 1100 then
-        -- Create the window now that game_interface is available
-        createImbuementTrackerWindow()
+function check()
+    if not imbuementTrackerButton then
+        imbuementTrackerButton = modules.client_topmenu.addRightGameToggleButton('imbuementTrackerButton', tr('Imbuement Tracker'), '/images/topbuttons/button_imbuementtracker', toggle)
+        imbuementTrackerButton:setOn(true)
+        loadFilters()
         
-        if not imbuementTracker then
-            return
+        if imbuementTracker then
+            if not imbuementTracker:getParent() then
+                local panel = modules.game_interface.findContentPanelAvailable(imbuementTracker, imbuementTracker:getMinimumHeight())
+                if panel then
+                    panel:addChild(imbuementTracker)
+                end
+            end
+            imbuementTracker:open()
         end
         
-        imbuementTrackerButton = modules.client_topmenu.addRightGameToggleButton('imbuementTrackerButton', tr('Imbuement Tracker'), '/images/icons/icon-imbuementtracker-widget', toggle)
-        imbuementTrackerButton:setOn(true)
         g_game.imbuementDurations(true)
-        loadFilters()
     end
 end
 
-function onGameEnd()
-    imbuementTracker.contentsPanel:destroyChildren()
+function hide()
+    if imbuementTracker and imbuementTracker.contentsPanel then
+        imbuementTracker.contentsPanel:destroyChildren()
+    end
     saveFilters()
 end
 
