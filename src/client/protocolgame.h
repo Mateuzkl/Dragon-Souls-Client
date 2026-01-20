@@ -271,6 +271,10 @@ private:
     void parseImbuementWindow(const InputMessagePtr& msg);
     void parseCloseImbuementWindow(const InputMessagePtr& msg);
     void parseImbuementDurations(const InputMessagePtr& msg);
+    void parseBestiaryRaces(const InputMessagePtr& msg);
+    void parseBestiaryOverview(const InputMessagePtr& msg);
+    void parseBestiaryMonsterData(const InputMessagePtr& msg);
+    void parseBestiaryCharmsData(const InputMessagePtr& msg);
     void parseCyclopediaNewDetails(const InputMessagePtr& msg);
     void parseCyclopedia(const InputMessagePtr& msg);
     void parseDailyRewardState(const InputMessagePtr& msg);

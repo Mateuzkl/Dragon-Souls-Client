@@ -313,6 +313,18 @@ void ProtocolGame::parseMessage(const InputMessagePtr& msg)
                 else
                     parseVipLogout(msg);
                 break;
+            case Proto::GameServerBestiaryRaces:
+                parseBestiaryRaces(msg);
+                break;
+            case Proto::GameServerBestiaryOverview:
+                parseBestiaryOverview(msg);
+                break;
+            case Proto::GameServerBestiaryMonsterData:
+                parseBestiaryMonsterData(msg);
+                break;
+            case Proto::GameServerBestiaryCharmsData:
+                parseBestiaryCharmsData(msg);
+                break;
             case Proto::GameServerTutorialHint:
                 parseTutorialHint(msg);
                 break;
@@ -3704,4 +3716,164 @@ Position ProtocolGame::getPosition(const InputMessagePtr& msg)
     uint8 z = msg->getU8();
 
     return Position(x, y, z);
+}
+
+void ProtocolGame::parseBestiaryRaces(const InputMessagePtr& msg)
+{
+    // Opcode 0xD5 (213)
+    uint16 count = msg->getU16();
+    std::vector<std::tuple<std::string, uint16, uint16>> groups;
+    for (int i = 0; i < count; ++i) {
+        std::string name = msg->getString();
+        uint16 amount = msg->getU16();
+        uint16 discovered = msg->getU16();
+        groups.emplace_back(name, amount, discovered);
+    }
+    g_lua.callGlobalField("g_game", "onBestiaryRaces", groups);
+}
+
+void ProtocolGame::parseBestiaryOverview(const InputMessagePtr& msg)
+{
+    // Opcode 0xD6 (214)
+    std::string categoryName = msg->getString();
+    uint16 count = msg->getU16();
+    std::vector<std::tuple<uint16, uint16>> monsters;
+
+    for (int i = 0; i < count; ++i) {
+        uint16 raceId = msg->getU16();
+        uint16 currentLevel = msg->getU16();
+        monsters.emplace_back(raceId, currentLevel);
+    }
+    g_lua.callGlobalField("g_game", "onBestiaryOverview", categoryName, monsters);
+}
+
+void ProtocolGame::parseBestiaryMonsterData(const InputMessagePtr& msg)
+{
+    // Opcode 0xD7 (215)
+    uint16 raceId = msg->getU16();
+    std::string raceName = msg->getString();
+    uint8 currentLevel = msg->getU8();
+    uint32 killCounter = msg->getU32();
+    uint16 first = msg->getU16();
+    uint16 second = msg->getU16();
+    uint16 final = msg->getU16();
+    uint8 difficulty = msg->getU8();
+    uint8 occurrence = msg->getU8();
+    
+    uint8 lootCount = msg->getU8();
+    std::vector<std::tuple<uint16, uint8, std::string, uint8, bool>> loots;
+    
+    for(int i=0; i<lootCount; ++i) {
+        if (killCounter < 1) {
+            msg->getU16(); // 0x00
+            msg->getU8(); // 0x0
+            uint8 diff = msg->getU8();
+            loots.emplace_back(0, diff, "", 0, false);
+        } else {
+            uint16 itemId = msg->getU16();
+            uint8 diff = msg->getU8();
+            msg->getU8(); // 0 = normal loot / 1 = special event
+            std::string itemName = msg->getString();
+            bool stackable = (msg->getU8() == 0x1);
+            loots.emplace_back(itemId, diff, itemName, 0, stackable);
+        }
+    }
+    
+    // Level > 1 data
+    uint16 charmPoints = 0;
+    uint8 attackMode = 0;
+    bool castSpells = false;
+    uint32 maxHealth = 0;
+    uint32 experience = 0;
+    uint16 speed = 0;
+    uint16 armor = 0;
+    
+    if (currentLevel > 1) {
+        charmPoints = msg->getU16();
+        attackMode = msg->getU8();
+        castSpells = (msg->getU8() == 0x02);
+        maxHealth = msg->getU32();
+        experience = msg->getU32();
+        speed = msg->getU16();
+        armor = msg->getU16();
+    }
+    
+    // Level > 2 data
+    std::vector<std::tuple<uint8, uint16>> elements;
+    bool descriptionEnabled = false;
+    std::string description = "";
+    
+    if (currentLevel > 2) {
+        uint8 elementCount = msg->getU8();
+        for(int i=0; i<elementCount; ++i) {
+            uint8 elementId = msg->getU8();
+            uint16 percent = msg->getU16();
+            elements.emplace_back(elementId, percent);
+        }
+        
+        descriptionEnabled = (msg->getU16() == 0x01);
+        if (descriptionEnabled) {
+            description = msg->getString();
+        }
+    }
+    
+    // Level > 3 data
+    int8 charmid = -1;
+    bool charmUnlocked = false;
+    uint32 charmPrice = 0;
+    
+    if (currentLevel > 3) {
+        uint8 hasCharm = msg->getU8();
+        if (hasCharm == 0x01) {
+            charmid = msg->getU8();
+            charmPrice = msg->getU32();
+            charmUnlocked = true;
+        } else {
+            msg->getU8(); // 0x01
+        }
+    }
+    
+    g_lua.callGlobalField("g_game", "onBestiaryMonsterData", 
+        raceId, raceName, currentLevel, killCounter, first, second, final, 
+        difficulty, occurrence, loots, 
+        charmPoints, attackMode, castSpells, maxHealth, experience, speed, armor,
+        elements, description, charmid, charmPrice);
+}
+
+void ProtocolGame::parseBestiaryCharmsData(const InputMessagePtr& msg)
+{
+    // Opcode 0xD8 (216)
+    uint32_t points = msg->getU32();
+    uint8_t count = msg->getU8();
+    
+    std::vector<std::tuple<uint8_t, std::string, std::string, uint8_t, uint16_t, bool, bool, uint16_t, uint32_t>> charms;
+    
+    for(int i=0; i<count; ++i) {
+        uint8_t id = msg->getU8();
+        std::string name = msg->getString();
+        std::string desc = msg->getString();
+        uint8_t type = msg->getU8();
+        uint16_t price = msg->getU16();
+        bool unlocked = (msg->getU8() == 0x01);
+        bool assigned = (msg->getU8() == 0x01);
+        
+        uint16_t creatureId = 0;
+        uint32_t castPrice = 0;
+        
+        if (assigned) {
+            creatureId = msg->getU16();
+            castPrice = msg->getU32();
+        }
+        
+        charms.emplace_back(id, name, desc, type, price, unlocked, assigned, creatureId, castPrice);
+    }
+    
+    msg->getU8(); // 0x04
+    uint16_t monstersCount = msg->getU16();
+    std::vector<uint16_t> monsters;
+    for(int i=0; i<monstersCount; ++i) {
+        monsters.push_back(msg->getU16());
+    }
+    
+    g_lua.callGlobalField("g_game", "onBestiaryCharmsData", points, charms, monsters);
 }

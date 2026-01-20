@@ -41,6 +41,7 @@ Module
     - game_imbuing
     - game_imbuementtracker
     - game_stats
+    - game_stash
     - game_shaders
     - game_bot
   @onLoad: init()

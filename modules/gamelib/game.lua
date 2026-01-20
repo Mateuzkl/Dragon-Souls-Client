@@ -116,3 +116,7 @@ end
 if not G.currentRsa then
   g_game.setRsa(OTSERV_RSA)
 end
+
+function g_game.onResourceBalance(type, amount)
+  signalcall(g_game.onResourceBalance, type, amount)
+end

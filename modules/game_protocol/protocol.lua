@@ -13,6 +13,7 @@ local ServerPackets = {
 	BestiaryCharmsData = 0xd8,
 	BestiaryTracker = 0xd9,
 	BestiaryTrackerTab = 0xB9,
+	ResourceBalance = 0xEE,
 	OpenStashSupply = 0x29,
 	UpdateLootTracker = 0xCF,
 	UpdateTrackerAnalyzer = 0xCC,
@@ -646,6 +647,114 @@ function registerProtocol()
     end
   end)
   
+  -- Bestiary opcodes
+  registerOpcode(ServerPackets.BestiaryData, function(protocol, msg)
+    local groups = {}
+    local count = msg:getU16()
+    for i = 1, count do
+      local categoryName = msg:getString()
+      local categoryAmount = msg:getU16()
+      local discoveredAmount = msg:getU16()
+      table.insert(groups, {categoryName, categoryAmount, discoveredAmount})
+    end
+    g_game.onBestiaryRaces(groups)
+  end)
+  
+  registerOpcode(ServerPackets.BestiaryOverview, function(protocol, msg)
+    local categoryName = msg:getString()
+    local monsters = {}
+    local count = msg:getU16()
+    for i = 1, count do
+      local raceId = msg:getU16()
+      local raceProgress = msg:getU16()
+      table.insert(monsters, {raceId, raceProgress})
+    end
+    g_game.onBestiaryOverview(categoryName, monsters)
+  end)
+  
+  registerOpcode(ServerPackets.BestiaryMonsterData, function(protocol, msg)
+    local raceId = msg:getU16()
+    local raceName = msg:getString()
+    local currentLevel = msg:getU8()
+    local killCounter = msg:getU32()
+    local bestiaryFirstUnlock = msg:getU16()
+    local bestiarySecondUnlock = msg:getU16()
+    local bestiaryToUnlock = msg:getU16()
+    local bestiaryStars = msg:getU8()
+    local bestiaryOccurrence = msg:getU8()
+    
+    local loots = {}
+    local lootCount = msg:getU16()
+    for i = 1, lootCount do
+      local itemId = msg:getU16()
+      local difficult = msg:getU8()
+      local lootName = msg:getString()
+      table.insert(loots, {itemId, difficult, lootName})
+    end
+    
+    local charmPoints = msg:getU16()
+    local attackMode = msg:getU8()
+    local castSpells = msg:getU8()
+    local maxHealth = msg:getU32()
+    local experience = msg:getU32()
+    local baseSpeed = msg:getU16()
+    local armor = msg:getU16()
+    
+    local elements = {}
+    local elementCount = msg:getU8()
+    for i = 1, elementCount do
+      local elementId = msg:getU8()
+      local elementPercent = msg:getU16()
+      table.insert(elements, {elementId, elementPercent})
+    end
+    
+    local description = msg:getString()
+    local charmid = msg:getU16()
+    local charmPrice = msg:getU32()
+    
+    g_game.onBestiaryMonsterData(raceId, raceName, currentLevel, killCounter, bestiaryFirstUnlock, bestiarySecondUnlock, bestiaryToUnlock, bestiaryStars, bestiaryOccurrence, loots, charmPoints, attackMode, castSpells, maxHealth, experience, baseSpeed, armor, elements, description, charmid, charmPrice)
+  end)
+  
+  registerOpcode(ServerPackets.BestiaryCharmsData, function(protocol, msg)
+    local charmsAmount = msg:getU32()
+    local charms = {}
+    local charmCount = msg:getU8()
+    for i = 1, charmCount do
+      local charmId = msg:getU8()
+      local charmName = msg:getString()
+      local charmDescription = msg:getString()
+      local charmType = msg:getU8()
+      local charmPoints = msg:getU16()
+      local charmUnlocked = msg:getU8()
+      local charmAssigned = msg:getU8()
+      local raceId = 0
+      local removeRuneCost = 0
+      if charmAssigned > 0 then
+        raceId = msg:getU16()
+        removeRuneCost = msg:getU32()
+      end
+      table.insert(charms, {charmId, charmName, charmDescription, charmType, charmPoints, charmUnlocked, charmAssigned, raceId, removeRuneCost})
+    end
+    
+    msg:getU8() -- Unknown byte (0x04)
+    
+    local monsters = {}
+    local monsterCount = msg:getU16()
+    for i = 1, monsterCount do
+      local raceId = msg:getU16()
+      table.insert(monsters, raceId)
+    end
+    
+    g_game.onBestiaryCharmsData(charmsAmount, charms, monsters)
+  end)
+  
+  -- Temporarily disabled to prevent stack overflow
+  -- registerOpcode(ServerPackets.ResourceBalance, function(protocol, msg)
+  --   local type = msg:getU8()
+  --   local balance = msg:getU64()
+  --   g_logger.info("Bestiary DEBUG: ResourceBalance received - Type: " .. type .. " Balance: " .. balance)
+  --   g_game.onResourceBalance(type, balance)
+  -- end)
   
 end
 
