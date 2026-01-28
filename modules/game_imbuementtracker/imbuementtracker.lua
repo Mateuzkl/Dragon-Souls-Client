@@ -300,9 +300,13 @@ function check()
                 panel:addChild(imbuementTracker)
             end
         end
-        imbuementTracker:open()
+        
+        if imbuementTrackerButton:isOn() then
+            imbuementTracker:open()
+        else
+            imbuementTracker:close()
+        end
     end
-    
     
     g_game.imbuementDurations(imbuementTrackerButton:isOn())
 end
