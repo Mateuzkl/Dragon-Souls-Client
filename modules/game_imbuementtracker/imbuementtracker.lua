@@ -15,7 +15,6 @@ local IMBUEMENTTRACKER_FILTERS = {
 }
 
 imbuementTrackerButton = nil
-imbuementTrackerMenuButton = nil
 imbuementTracker = nil
 
 function loadFilters()
@@ -43,7 +42,7 @@ function setFilter(filter)
     
     filters[filter] = not value
     g_settings.mergeNode('ImbuementTracker', { ['filters'] = filters })    
-    g_game.imbuementDurations(imbuementTrackerButton:isOn())
+    g_game.imbuementDurations(true)
 end
 
 function initialize()
@@ -57,6 +56,8 @@ function initialize()
     -- Create the window during initialization
     createImbuementTrackerWindow()
     
+    imbuementTrackerButton = modules.client_topmenu.addRightGameToggleButton('imbuementTrackerButton', tr('Imbuement Tracker'), '/images/topbuttons/particles', toggle, false, 8)
+
     if g_game.isOnline() then
         check()
     end
@@ -135,9 +136,6 @@ function createImbuementTrackerWindow()
 end
 
 function onMiniWindowOpen()
-    if imbuementTrackerButton then
-        imbuementTrackerButton:setOn(true)
-    end
 end
 
 function onMiniWindowClose()
@@ -157,6 +155,7 @@ function terminate()
         imbuementTrackerButton:destroy()
         imbuementTrackerButton = nil
     end
+
     if imbuementTracker then
         imbuementTracker:destroy()
         imbuementTracker = nil
@@ -292,23 +291,20 @@ function onUpdateImbuementTracker(items)
 end
 
 function check()
-    if not imbuementTrackerButton then
-        imbuementTrackerButton = modules.client_topmenu.addRightGameToggleButton('imbuementTrackerButton', tr('Imbuement Tracker'), '/images/topbuttons/button_imbuementtracker', toggle)
-        imbuementTrackerButton:setOn(true)
-        loadFilters()
-        
-        if imbuementTracker then
-            if not imbuementTracker:getParent() then
-                local panel = modules.game_interface.findContentPanelAvailable(imbuementTracker, imbuementTracker:getMinimumHeight())
-                if panel then
-                    panel:addChild(imbuementTracker)
-                end
+    loadFilters()
+
+    if imbuementTracker then
+        if not imbuementTracker:getParent() then
+            local panel = modules.game_interface.findContentPanelAvailable(imbuementTracker, imbuementTracker:getMinimumHeight())
+            if panel then
+                panel:addChild(imbuementTracker)
             end
-            imbuementTracker:open()
         end
-        
-        g_game.imbuementDurations(true)
+        imbuementTracker:open()
     end
+    
+    
+    g_game.imbuementDurations(imbuementTrackerButton:isOn())
 end
 
 function hide()

@@ -1,0 +1,12 @@
+Module
+  name: game_helper
+  description: Helper
+  author: Oskar
+  website: None
+  scripts: [ game_helper ]
+  
+  sandboxed: true
+  autoload: true
+  
+  @onLoad: onLoad()
+  @onUnload: onUnLoad()

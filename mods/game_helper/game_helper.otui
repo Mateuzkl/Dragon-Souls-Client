@@ -1,0 +1,478 @@
+HelperButton < UIWidget
+  size: 134 35
+  image-source: /images/ui/button
+  image-clip: 0 0 22 23
+  image-border: 3
+  icon-align: left
+  icon-offset: 6 2
+  icon-size: 32 32
+  text-align: center
+  text-offset: 8 2
+  color: #C0C0C0
+  $on:
+    image-clip: 0 46 22 23
+
+HelperFriendListLabel < UILabel
+  font: verdana-11px-monochrome
+  background-color: alpha
+  text-offset: 2 0
+  focusable: true
+  phantom: false
+
+  $focus:
+    background-color: #ffffff22
+
+HelperLabel < Label
+  color: #C0C0C0
+
+HelperPanel < UIWidget
+  image-source: /images/ui/window
+  image-border: 6
+  image-border-top: 27
+  padding-top: 20
+  padding-left: 4
+  padding-right: 4
+  padding-bottom: 4
+  text-align: top
+  text-offset: 0 2
+  color: #C0C0C0
+
+HelperTrainer < Panel
+  anchors.top: prev.bottom
+  anchors.left: prev.left
+  height: 34
+  margin-top: 8
+
+  HelperSlot
+    id: slot
+    anchors.top: parent.top
+    anchors.left: parent.left
+    &onMouseRelease: modules.game_helper.m_HelperFunction.onSlotMouseRelease
+    
+  ComboBox
+    id: comboBox
+    anchors.verticalcenter: prev.verticalcenter
+    anchors.left: prev.right
+    margin-left: 4
+    size: 66 20
+
+  UIWidget
+    anchors.left: prev.right
+    anchors.verticalcenter: prev.verticalcenter
+    margin-left: 6
+    image-source: images/show-gui-help-grey
+    !tooltip: tr('Maximum health')
+
+HelperFriendHealing < Panel
+  anchors.top: prev.bottom
+  anchors.left: prev.left
+  height: 34
+  margin-top: 6
+
+  HelperSlot
+    id: slot
+    anchors.top: parent.top
+    anchors.left: parent.left
+    virtual: true
+    size: 34 34
+    &onMouseRelease: modules.game_helper.m_HelperFunction.onSlotMouseRelease
+      
+  CheckBox
+    id: checkBox
+    anchors.top: prev.top
+    anchors.left: prev.right
+    anchors.right: parent.right
+    !text: tr('Enable')
+    margin-left: 6
+    
+  ComboBox
+    id: comboBox
+    anchors.top: prev.bottom
+    anchors.left: prev.left
+    margin-top: 4
+    size: 66 20
+
+  UIWidget
+    anchors.left: prev.right
+    anchors.verticalcenter: prev.verticalcenter
+    margin-left: 6
+    image-source: images/show-gui-help-grey
+    !tooltip: tr('Maximum health')
+
+HelperSlot < UIButton
+  size: 34 34
+  &onMouseRelease: modules.game_helper.m_HelperFunction.onSlotMouseRelease
+    
+  Item
+    id: item
+    anchors.fill: parent
+    padding: 1
+    &selectable: true
+    &editable: false
+    virtual: true
+    border-width: 1
+    border-color: #00000000
+    draggable: true
+    
+    $!on:
+      image-source: /images/game/actionbar/actionbarslot
+      image-color: #dfdfdf
+      image-clip: 0 0 34 34
+      image-border: 0
+
+    $on:
+      image-source: /images/ui/button
+      image-color: #dfdfdf
+      image-clip: 0 0 22 23
+      image-border: 3
+
+    $pressed on:
+      image-clip: 0 46 22 23
+
+  Label
+    id: text
+    anchors.fill: prev
+    text-auto-resize: true
+    text-wrap: true
+    phantom: true
+    margin: 1
+    text-align: center
+    font: verdana-9px
+
+MainWindow
+  id: helperWindow
+  !text: tr('Helper')
+  size: 300 280
+  focusable: false
+  @onEscape: modules.game_helper.m_HelperFunction.destroy()
+  
+  HelperButton
+    id: healingButton
+    anchors.top: parent.top
+    anchors.left: parent.left
+    !text: tr('Healing')
+    icon-source: images/icon-createpartygroup
+    @onClick: modules.game_helper.m_HelperFunction.openTab(1)
+  
+  HelperButton
+    id: toolsButton
+    anchors.top: parent.top
+    anchors.right: parent.right
+    !text: tr('Tools')
+    icon-source: images/icon-friends-configuration
+    @onClick: modules.game_helper.m_HelperFunction.openTab(2)
+    on: true
+
+  HelperPanel
+    id: friendHealingPanel
+    anchors.bottom: separator.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    !text: tr('Friend Healing Helper')
+    visible: false
+    height: 1
+    $on:
+      visible: true
+      height: 122
+    
+    VerticalSeparator
+      id: separator
+      anchors.top: parent.top
+      anchors.horizontalcenter: parent.horizontalcenter
+      anchors.bottom: parent.bottom
+
+    HelperLabel
+      anchors.top: parent.top
+      anchors.left: parent.left
+      margin-left: 2
+      text-horizontal-auto-resize: true
+      !text: tr('Select a friend')
+
+    UIWidget
+      anchors.left: prev.right
+      anchors.verticalcenter: prev.verticalcenter
+      margin-left: 6
+      image-source: images/show-gui-help-grey
+      !tooltip: tr('Select a friend')
+
+    TextList
+      id: friends
+      background-color: #383838
+      anchors.top: prev.bottom
+      anchors.left: parent.left
+      anchors.right: separator.left
+      anchors.bottom: parent.bottom
+      margin-left: 2
+      margin-bottom: 2
+      margin-top: 4
+      margin-right: 18
+      padding: 1
+      focusable: false
+      vertical-scrollbar: friendsScrollBar
+
+    VerticalScrollBar
+      id: friendsScrollBar
+      anchors.top: prev.top
+      anchors.bottom: prev.bottom
+      anchors.left: prev.right
+      step: 14
+      pixels-scroll: true
+
+    HelperLabel
+      anchors.top: parent.top
+      anchors.left: separator.right
+      anchors.right: parent.right
+      margin-left: 4
+      !text: tr('Heal Friend List')
+
+    HelperFriendHealing
+      id: friendHealing1
+      anchors.top: prev.bottom
+      anchors.left: prev.left
+      anchors.right: prev.right
+
+    HelperFriendHealing
+      id: friendHealing2
+      anchors.top: prev.bottom
+      anchors.left: prev.left
+      anchors.right: prev.right
+
+  HelperPanel
+    id: toolsPanel
+    anchors.top: toolsButton.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: prev.top
+    margin-top: 4
+    margin-bottom: 4
+    !text: tr('Tools Helper')
+
+    VerticalSeparator
+      id: separator
+      anchors.top: parent.top
+      anchors.horizontalcenter: parent.horizontalcenter
+      anchors.bottom: parent.bottom
+
+    HorizontalSeparator
+      id: separatorLeft
+      anchors.left: parent.left
+      anchors.right: separator.left
+      anchors.verticalcenter: parent.verticalcenter
+      margin-bottom: 2
+      margin-left: 3
+      margin-right: 6
+
+    HorizontalSeparator
+      id: separatorRight
+      anchors.left: separator.right
+      anchors.right: parent.right
+      anchors.verticalcenter: prev.verticalcenter
+      margin-left: 6
+      margin-right: 3
+
+    // Bottom right
+    HelperLabel
+      anchors.top: separatorRight.bottom
+      anchors.left: separatorRight.left
+      text-horizontal-auto-resize: true
+      !text: tr('Others Tools')
+      margin-top: 6
+
+    UIWidget
+      anchors.left: prev.right
+      anchors.verticalcenter: prev.verticalcenter
+      margin-left: 6
+      image-source: images/show-gui-help-grey
+      !tooltip: tr('Other tools')
+      
+    CheckBox
+      id: autoEatFoodCheckBox
+      anchors.left: separatorRight.left
+      anchors.right: separatorRight.right
+      anchors.top: prev.bottom
+      !text: tr('Auto Eat Food')
+      margin-top: 6
+      
+    CheckBox
+      id: autoReconnectCheckBox
+      anchors.left: prev.left
+      anchors.right: prev.right
+      anchors.top: prev.bottom
+      !text: tr('Auto Reconnect')
+      margin-top: 6
+
+    // Top right
+    HelperLabel
+      anchors.top: parent.top
+      anchors.left: separatorRight.left
+      anchors.right: parent.right
+      !text: tr('Auto Haste')
+
+    HelperSlot
+      id: autoHasteSlot
+      anchors.top: prev.bottom
+      anchors.left: prev.left
+      margin-top: 8
+      
+    CheckBox
+      id: enableAutoHasteCheckBox
+      anchors.top: prev.top
+      anchors.left: prev.right
+      anchors.right: separatorRight.right
+      !text: tr('Enable')
+      margin-left: 6
+      margin-top: 3
+      
+    CheckBox
+      id: pzCastCheckBox
+      anchors.top: prev.bottom
+      anchors.left: prev.left
+      anchors.right: separatorRight.right
+      !text: tr('PZ Cast')
+      margin-top: 6
+
+    // Top left
+    HelperLabel
+      anchors.top: parent.top
+      anchors.left: separatorLeft.left
+      anchors.right: separatorLeft.right
+      !text: tr('Mana Training')
+
+    HelperSlot
+      id: manaTrainingSlot
+      anchors.top: prev.bottom
+      anchors.left: prev.left
+      margin-top: 8
+      
+    CheckBox
+      id: enableManaTrainingCheckBox
+      anchors.top: prev.top
+      anchors.left: prev.right
+      anchors.right: separatorLeft.right
+      !text: tr('Enable')
+      margin-left: 6
+
+    ComboBox
+      id: manaTrainingComboBox
+      anchors.top: prev.bottom
+      anchors.left: prev.left
+      margin-top: 3
+      size: 66 20
+
+    UIWidget
+      anchors.left: prev.right
+      anchors.verticalcenter: prev.verticalcenter
+      margin-left: 6
+      image-source: images/show-gui-help-grey
+      !tooltip: tr('Maximum mana')
+
+    // Bottom left
+    HelperLabel
+      anchors.top: separatorLeft.bottom
+      anchors.left: separatorLeft.left
+      anchors.right: separatorLeft.right
+      margin-top: 6
+      !text: tr('Exercise Training')
+
+    HelperSlot
+      id: exerciseTrainingSlot
+      anchors.top: prev.bottom
+      anchors.left: prev.left
+      margin-top: 8
+      
+    CheckBox
+      id: enableExerciseTrainingCheckBox
+      anchors.top: prev.top
+      anchors.left: prev.right
+      anchors.right: separatorLeft.right
+      !text: tr('Enable')
+      margin-left: 6
+
+    ComboBox
+      id: exerciseTrainingComboBox
+      anchors.top: prev.bottom
+      anchors.left: prev.left
+      margin-top: 3
+      size: 66 20
+
+    UIWidget
+      anchors.left: prev.right
+      anchors.verticalcenter: prev.verticalcenter
+      margin-left: 6
+      image-source: images/show-gui-help-grey
+      !tooltip: tr('Number of exercise weapons used')
+
+  HelperPanel
+    id: healingPanel
+    anchors.fill: prev
+    visible: false
+    !text: tr('Auto Healing Helper')
+
+    VerticalSeparator
+      id: separator
+      anchors.top: parent.top
+      anchors.horizontalcenter: parent.horizontalcenter
+      anchors.bottom: parent.bottom
+
+    // Spell Healing
+    HelperLabel
+      anchors.top: parent.top
+      anchors.left: parent.left
+      anchors.right: separator.left
+      margin-left: 3
+      !text: tr('Spell Healing')
+
+    HelperTrainer
+      id: spellHealingSlot1
+      anchors.right: separator.left
+
+    HelperTrainer
+      id: spellHealingSlot2
+      anchors.right: separator.left
+      
+    HelperLabel
+      anchors.top: parent.top
+      anchors.left: separator.right
+      anchors.right: parent.right
+      margin-left: 3
+      !text: tr('Potion Healing')
+
+    HelperTrainer
+      id: potionHealingSlot1
+      anchors.right: parent.right
+
+    HelperTrainer
+      id: potionHealingSlot2
+      anchors.right: parent.right
+
+    HelperTrainer
+      id: potionHealingSlot3
+      anchors.right: parent.right
+  
+  Button
+    id: buttonClose
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+    size: 60 28
+    !text: tr('Close')
+    @onClick: modules.game_helper.m_HelperFunction.destroy()
+
+  HorizontalSeparator
+    id: separator
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: prev.top
+    margin-bottom: 10
+
+  Label
+    anchors.left: parent.left
+    anchors.verticalcenter: buttonClose.verticalcenter
+    text-horizontal-auto-resize: true
+    !text: tr('Helper Status: Enabled')
+    color: #C0C0C0
+    
+  UIWidget
+    anchors.left: prev.right
+    anchors.verticalcenter: prev.verticalcenter
+    margin-left: 8
+    image-source: images/icon-accept

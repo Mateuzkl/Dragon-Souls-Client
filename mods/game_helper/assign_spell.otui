@@ -1,0 +1,88 @@
+SpellPreview < UICheckBox
+  height: 34
+  text-wrap: true
+  multi-line: true
+  focusable: true
+  text-offset: 38 2
+  image-source:
+  change-cursor-image: false
+
+  $hover !disabled:
+    color: #ffffff
+
+  $!checked:
+    background-color: alpha
+
+  $checked:
+    background-color: #ffffff22
+
+  $disabled:
+    image-color: #dfdfdf88
+    color: #dfdfdf88
+    opacity: 0.8
+
+  UIWidget
+    id: image
+    anchors.left: parent.left
+    anchors.top: parent.top
+    phantom: true
+    padding: 1
+    size: 34 34
+
+MainWindow
+  id: assignSpellWindow
+  size: 275 230
+  !text: tr('Assign Spell')
+  @onEscape: modules.game_helper.m_HelperFunction.destroySpellWindow()
+
+  TextList
+    id: list
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    height: 140
+    padding: 1
+    focusable: false
+    vertical-scrollbar: listScrollBar
+    background-color: #383838
+
+  VerticalScrollBar
+    id: listScrollBar
+    anchors.top: prev.top
+    anchors.right: prev.right
+    anchors.bottom: prev.bottom
+    margin-right: 1
+    step: 35
+    pixels-scroll: true
+
+  HorizontalSeparator
+    anchors.top: prev.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 10
+
+  Button
+    id: buttonClose
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+    size: 60 28
+    !text: tr('Close')
+    &onClick: modules.game_helper.m_HelperFunction.destroySpellWindow
+
+  Button
+    id: buttonApply
+    anchors.right: prev.left
+    anchors.bottom: parent.bottom
+    margin-right: 5
+    size: 60 28
+    !text: tr('Apply')
+    &onClick: modules.game_helper.m_HelperFunction.applySpellWindow
+
+  Button
+    id: buttonOk
+    anchors.right: prev.left
+    anchors.bottom: parent.bottom
+    margin-right: 5
+    size: 60 28
+    !text: tr('Ok')
+    &onClick: modules.game_helper.m_HelperFunction.okSpellWindow
