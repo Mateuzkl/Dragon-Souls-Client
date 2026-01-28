@@ -1,0 +1,2 @@
+// Adicione esta linha após PropDisableUpdateTemporarily = 1 << 25,
+PropOnHTML = 1 << 26,

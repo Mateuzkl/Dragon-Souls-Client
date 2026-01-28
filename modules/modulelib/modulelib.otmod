@@ -1,0 +1,9 @@
+Module
+  name: modulelib
+  description: Module library with HTML parsing extensions
+  author: Dragon Souls Team
+  website: 
+  sandboxed: true
+  scripts: [ modulelib ]
+  @onLoad: init()
+  @onUnload: terminate()

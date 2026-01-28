@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Advanced HTML Test</title>
+    <style>
+        .container {
+            background-color: #2c3e50;
+            padding: 20px;
+            border: 2px solid #3498db;
+            margin: 10px;
+        }
+        
+        .header {
+            color: #ecf0f1;
+            font-size: 16px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .label {
+            color: #bdc3c7;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .input {
+            width: 200px;
+            height: 25px;
+            background-color: #34495e;
+            border: 1px solid #7f8c8d;
+            color: #ecf0f1;
+        }
+        
+        .button {
+            background-color: #3498db;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            margin: 5px;
+        }
+        
+        .button:hover {
+            background-color: #2980b9;
+        }
+        
+        .float-right {
+            float: right;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">🚀 Advanced HTML System Test</div>
+        
+        <div class="form-group">
+            <label class="label">Username:</label>
+            <input type="text" class="input" placeholder="Enter username" onchange="onUsernameChange(event)" />
+        </div>
+        
+        <div class="form-group">
+            <label class="label">Password:</label>
+            <input type="password" class="input" placeholder="Enter password" onchange="onPasswordChange(event)" />
+        </div>
+        
+        <div class="form-group">
+            <label class="label">Server:</label>
+            <select class="input" onchange="onServerChange(event)">
+                <option value="server1">Main Server</option>
+                <option value="server2">Test Server</option>
+                <option value="server3">Development Server</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <input type="checkbox" id="remember" onchange="onRememberChange(event)" />
+            <label for="remember" class="label">Remember me</label>
+        </div>
+        
+        <div>
+            <button class="button" onclick="onLoginClick(event)">Login</button>
+            <button class="button float-right" onclick="onCancelClick(event)">Cancel</button>
+        </div>
+        
+        <div id="status" class="hidden">
+            <label class="label">Status: Ready</label>
+        </div>
+    </div>
+</body>
+</html>

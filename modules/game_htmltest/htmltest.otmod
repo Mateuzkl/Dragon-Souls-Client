@@ -1,0 +1,9 @@
+Module
+  name: game_htmltest
+  description: HTML System Test Module
+  author: Dragon Souls Team
+  website: 
+  sandboxed: true
+  scripts: [ htmltest ]
+  @onLoad: init()
+  @onUnload: terminate()

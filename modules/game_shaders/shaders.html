@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shader Controller</title>
+</head>
+<body>
+    <div id="shaderPanel" style="width: 300px; height: 200px;">
+        <label>Map Shaders:</label>
+        <select id="mapComboBox" onchange="ShaderController:onMapComboBoxChange(event)">
+            <option value="Default">Default</option>
+        </select>
+        
+        <label>Outfit Shaders:</label>
+        <select id="outfitComboBox" onchange="ShaderController:onOutfitComboBoxChange(event)">
+            <option value="Default">Default</option>
+        </select>
+        
+        <label>Mount Shaders:</label>
+        <select id="mountComboBox" onchange="ShaderController:onMountComboBoxChange(event)">
+            <option value="Default">Default</option>
+        </select>
+    </div>
+</body>
+</html>

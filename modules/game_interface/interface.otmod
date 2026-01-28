@@ -44,5 +44,6 @@ Module
     - game_stash
     - game_shaders
     - game_bot
+    - game_helper
   @onLoad: init()
   @onUnload: terminate()

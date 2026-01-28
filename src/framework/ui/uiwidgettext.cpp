@@ -112,7 +112,7 @@ void UIWidget::parseTextStyle(const OTMLNodePtr& styleNode)
 
 void UIWidget::drawText(const Rect& screenCoords)
 {
-    if(m_drawText.length() == 0 || m_color.aF() == 0.0f)
+    if(m_drawText.length() == 0 || m_color.aF() == 0.0f || !m_font)
         return;
 
     if(screenCoords != m_textCachedScreenCoords || m_textMustRecache) {

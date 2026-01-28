@@ -26,6 +26,7 @@
 #include "declarations.h"
 #include <framework/core/inputevent.h>
 #include <framework/otml/declarations.h>
+#include <map>
 
 class UIWidget;
 
@@ -50,10 +51,18 @@ public:
     bool importStyleFromString(std::string data);
     void importStyleFromOTML(const OTMLNodePtr& styleNode);
     OTMLNodePtr getStyle(const std::string& styleName);
+    std::string getStyleName(const std::string& styleName);
     std::string getStyleClass(const std::string& styleName);
 
     UIWidgetPtr loadUIFromString(const std::string& data, const UIWidgetPtr& parent);
     UIWidgetPtr loadUI(std::string file, const UIWidgetPtr& parent);
+    UIWidgetPtr loadHtml(std::string file, const UIWidgetPtr& parent);
+    UIWidgetPtr parseHtmlContent(const std::string& htmlContent, const UIWidgetPtr& parent, const std::string& sourceFile);
+    void parseHtmlElements(const std::string& htmlContent, const UIWidgetPtr& parent);
+    void parseHtmlTag(const std::string& tagContent, std::string& tagName, std::map<std::string, std::string>& attributes);
+    UIWidgetPtr createHtmlWidget(const std::string& tagName, const std::map<std::string, std::string>& attributes, const UIWidgetPtr& parent);
+    void parseStyleAttribute(const std::string& style, const OTMLNodePtr& node);
+    void parseSelectOptions(const std::string& content, const UIWidgetPtr& selectWidget);
     UIWidgetPtr displayUI(const std::string& file) { return loadUI(file, m_rootWidget); }
     UIWidgetPtr createWidget(const std::string& styleName, const UIWidgetPtr& parent);
     UIWidgetPtr createWidgetFromOTML(const OTMLNodePtr& widgetNode, const UIWidgetPtr& parent);

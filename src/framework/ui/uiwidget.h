@@ -103,6 +103,7 @@ protected:
     Fw::FocusReason m_lastFocusReason;
     Fw::AutoFocusPolicy m_autoFocusPolicy;
     int m_events = 0;
+    stdext::boolean<false> m_isHtmlWidget;
 
 public:
     void addChild(const UIWidgetPtr& child);
@@ -186,6 +187,8 @@ public:
     UIWidgetList recursiveGetChildrenByMarginPos(const Point& childPos);
     UIWidgetPtr backwardsGetWidgetById(const std::string& id);
     bool hasEventListener(WidgetEvents event) { return (m_events & event) != 0; }
+    bool isOnHtml() const { return m_isHtmlWidget; }
+    void setIsHtmlWidget(bool isHtml) { m_isHtmlWidget = isHtml; }
 
 private:
     stdext::boolean<false> m_updateEventScheduled;

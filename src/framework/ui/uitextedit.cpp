@@ -76,7 +76,7 @@ void UITextEdit::drawSelf(Fw::DrawPane drawPane)
     drawIcon(m_rect);
 
     int textLength = m_glyphsCoords.size();
-    const TexturePtr& texture = m_font->getTexture();
+    const auto& texture = m_font->getTexture();
     if(!texture)
         return;
 

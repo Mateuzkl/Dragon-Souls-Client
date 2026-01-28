@@ -414,9 +414,11 @@ void Application::registerLuaFunctions()
     g_lua.bindSingletonFunction("g_ui", "importStyle", &UIManager::importStyle, &g_ui);
     g_lua.bindSingletonFunction("g_ui", "importStyleFromString", &UIManager::importStyleFromString, &g_ui);
     g_lua.bindSingletonFunction("g_ui", "getStyle", &UIManager::getStyle, &g_ui);
+    g_lua.bindSingletonFunction("g_ui", "getStyleName", &UIManager::getStyleName, &g_ui);
     g_lua.bindSingletonFunction("g_ui", "getStyleClass", &UIManager::getStyleClass, &g_ui);
     g_lua.bindSingletonFunction("g_ui", "loadUI", &UIManager::loadUI, &g_ui);
     g_lua.bindSingletonFunction("g_ui", "loadUIFromString", &UIManager::loadUIFromString, &g_ui);
+    g_lua.bindSingletonFunction("g_ui", "loadHtml", &UIManager::loadHtml, &g_ui);
     g_lua.bindSingletonFunction("g_ui", "displayUI", &UIManager::displayUI, &g_ui);
     g_lua.bindSingletonFunction("g_ui", "createWidget", &UIManager::createWidget, &g_ui);
     g_lua.bindSingletonFunction("g_ui", "createWidgetFromOTML", &UIManager::createWidgetFromOTML, &g_ui);
@@ -738,6 +740,7 @@ void Application::registerLuaFunctions()
     g_lua.bindClassMemberFunction<UIWidget>("hasEventListener", &UIWidget::hasEventListener);
     g_lua.bindClassMemberFunction<UIWidget>("setTextOverflowLength", &UIWidget::setTextOverflowLength);
     g_lua.bindClassMemberFunction<UIWidget>("setTextOverflowCharacter", &UIWidget::setTextOverflowCharacter);
+    g_lua.bindClassMemberFunction<UIWidget>("setIsHtmlWidget", &UIWidget::setIsHtmlWidget);
 
     // UILayout
     g_lua.registerClass<UILayout>();

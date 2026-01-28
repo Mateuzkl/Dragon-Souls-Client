@@ -1,0 +1,49 @@
+Panel
+  id: shaderPanel
+  size: 200 200
+  anchors.top: parent.top
+  anchors.right: parent.right
+  margin-top: 80
+  margin-right: 10
+  image-source: /images/ui/panel_flat
+  image-border: 1
+  padding: 10
+
+  Label
+    text: Map Shaders:
+    anchors.top: parent.top
+    anchors.left: parent.left
+    margin-top: 5
+
+  ComboBox
+    id: mapComboBox
+    anchors.top: prev.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 3
+
+  Label
+    text: Outfit Shaders:
+    anchors.top: prev.bottom
+    anchors.left: parent.left
+    margin-top: 15
+
+  ComboBox
+    id: outfitComboBox
+    anchors.top: prev.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 3
+
+  Label
+    text: Mount Shaders:
+    anchors.top: prev.bottom
+    anchors.left: parent.left
+    margin-top: 15
+
+  ComboBox
+    id: mountComboBox
+    anchors.top: prev.bottom
+    anchors.left: parent.left
+    anchors.right: parent.right
+    margin-top: 3

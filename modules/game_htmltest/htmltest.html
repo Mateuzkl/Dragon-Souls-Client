@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HTML Test Module</title>
+</head>
+<body>
+    <div id="testPanel" style="width: 400px; height: 300px;">
+        <label>🎉 OLÁ TESTE HTML! 🎉</label>
+        
+        <div id="section1" style="width: 380px; height: 60px;">
+            <label>Selecione uma opção:</label>
+            <select id="testComboBox" onchange="onTestComboBoxChange(event)">
+                <option value="opcao1">Opção 1 - Vermelho</option>
+                <option value="opcao2">Opção 2 - Azul</option>
+                <option value="opcao3">Opção 3 - Verde</option>
+                <option value="opcao4">Opção 4 - Amarelo</option>
+            </select>
+        </div>
+        
+        <div id="section2" style="width: 380px; height: 60px;">
+            <label>Escolha um modo:</label>
+            <select id="modeComboBox" onchange="onModeComboBoxChange(event)">
+                <option value="normal">Modo Normal</option>
+                <option value="avancado">Modo Avançado</option>
+                <option value="expert">Modo Expert</option>
+            </select>
+        </div>
+        
+        <div id="section3" style="width: 380px; height: 60px;">
+            <label>Configurações:</label>
+            <select id="configComboBox" onchange="onConfigComboBoxChange(event)">
+                <option value="config1">Configuração Padrão</option>
+                <option value="config2">Configuração Personalizada</option>
+                <option value="config3">Configuração Avançada</option>
+            </select>
+        </div>
+        
+        <div id="statusSection" style="width: 380px; height: 40px;">
+            <label id="statusLabel">Status: Sistema HTML carregado com sucesso!</label>
+        </div>
+    </div>
+</body>
+</html>
