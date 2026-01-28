@@ -85,11 +85,13 @@ function onLoad()
 	m_HelperList.friendHealingSlots[1].slot.type = m_HelperFunction.TYPE.ITEM
 
 	local spellData = modules.gamelib.SpellInfo["Default"]["Heal Friend"]
-	m_HelperList.friendHealingSlots[2].slot.text:setImageSource(SpelllistSettings['Default'].iconFile)
-	m_HelperList.friendHealingSlots[2].slot.text:setImageClip(Spells.getImageClip(SpellIcons[spellData.icon][1], 'Default'))
-	m_HelperList.friendHealingSlots[2].slot.words = spellData.words
-	m_HelperList.friendHealingSlots[2].slot.spellName = spellData.spellName
-	m_HelperList.friendHealingSlots[2].slot.type = m_HelperFunction.TYPE.SPELL
+	if spellData then
+		m_HelperList.friendHealingSlots[2].slot.text:setImageSource(SpelllistSettings['Default'].iconFile)
+		m_HelperList.friendHealingSlots[2].slot.text:setImageClip(Spells.getImageClip(SpellIcons[spellData.icon][1], 'Default'))
+		m_HelperList.friendHealingSlots[2].slot.words = spellData.words
+		m_HelperList.friendHealingSlots[2].slot.spellName = "Heal Friend"
+		m_HelperList.friendHealingSlots[2].slot.type = m_HelperFunction.TYPE.SPELL
+	end
 
 	for i = 0, 10 do
 		m_HelperList.manaTrainingComboBox:addOption(math.max(1, (i * 10)) .. "%")
@@ -187,7 +189,21 @@ m_HelperFunction.canUseSpell = function(name)
 		return (m_HelperFunction.spellsExhaust["potion"] or 0) < os.time()
 	end
 
-	return (m_HelperFunction.spellsExhaust[name] or 0) < os.time()
+	if (m_HelperFunction.spellsExhaust[name] or 0) >= os.time() then
+		return false
+	end
+	
+	local localPlayer = g_game.getLocalPlayer()
+	if localPlayer and modules.gamelib.SpellInfo["Default"][name] then
+		local spellData = modules.gamelib.SpellInfo["Default"][name]
+		local currentMana = localPlayer:getMana()
+		local requiredMana = spellData.mana or 0
+		if requiredMana > 0 and currentMana < requiredMana then
+			return false
+		end
+	end
+	
+	return true
 end
 
 m_HelperFunction.addExhaust = function(name)
@@ -196,7 +212,12 @@ m_HelperFunction.addExhaust = function(name)
 		return true
 	end
 
-	m_HelperFunction.spellsExhaust[name] = os.time() + (modules.gamelib.SpellInfo["Default"][name].exhaustion / 1000)
+	if modules.gamelib.SpellInfo["Default"][name] then
+		local exhaustTime = modules.gamelib.SpellInfo["Default"][name].exhaustion / 1000
+		m_HelperFunction.spellsExhaust[name] = os.time() + exhaustTime
+	else
+		m_HelperFunction.spellsExhaust[name] = os.time() + 2
+	end
 end
 
 m_HelperFunction.onRemoveVip = function(id)
@@ -217,6 +238,26 @@ m_HelperFunction.onAddVip = function(id, name, state, description, iconId, notif
 	label.state = state
 	label:setText(name)
 	label:setId(id)
+	
+	-- Simple click handler
+	label.onMouseRelease = function(widget, mousePos, mouseButton)
+		if mouseButton == MouseLeftButton then
+			-- Manually set as selected
+			m_HelperList.selectedFriend = {
+				name = name,
+				state = state,
+				widget = widget
+			}
+			-- Visual feedback
+			for _, child in pairs(m_HelperList.friendHealingFriends:getChildren()) do
+				child:setBackgroundColor('alpha')
+			end
+			widget:setBackgroundColor('#ffffff22')
+			return true
+		end
+		return false
+	end
+	
 	if state == VipState.Online then
 		label:setColor('#00FF00')
 	elseif state == VipState.Pending then
@@ -275,9 +316,12 @@ m_HelperFunction.timerEvent = function()
 
 	if m_HelperList.enableAutoHasteCheckBox:isChecked() then
 		-- Auto haste
-		if m_HelperList.pzCastCheckBox:isChecked() or not modules.game_inventory.hasStatus("condition_protection_zone") then
+		local hasPz = modules.game_inventory and modules.game_inventory.hasStatus and modules.game_inventory.hasStatus("condition_protection_zone")
+		local hasHaste = modules.game_inventory and modules.game_inventory.hasStatus and modules.game_inventory.hasStatus("condition_haste")
+		
+		if m_HelperList.pzCastCheckBox:isChecked() or not hasPz then
 			if m_HelperList.autoHasteSlot.type == m_HelperFunction.TYPE.SPELL then
-				if not modules.game_inventory.hasStatus("condition_haste") and m_HelperFunction.canUseSpell(m_HelperList.autoHasteSlot.spellName) then
+				if not hasHaste and m_HelperFunction.canUseSpell(m_HelperList.autoHasteSlot.spellName) then
 					g_game.talk(m_HelperList.autoHasteSlot.words)
 					m_HelperFunction.addExhaust(m_HelperList.autoHasteSlot.spellName)
 				end
@@ -298,11 +342,19 @@ m_HelperFunction.timerEvent = function()
 		end
 	end
 
-	local focusedChild = m_HelperList.friendHealingFriends:getFocusedChild()
-	if focusedChild and focusedChild.state == VipState.Online then
-		-- Friend healing
-		local name = focusedChild:getText()
-		local target = g_map.getCreatureByName(name)
+	local selectedFriend = m_HelperList.selectedFriend
+	if selectedFriend and selectedFriend.state == VipState.Online then
+		local name = selectedFriend.name
+		local target = nil
+		
+		local spectators = g_map.getSpectators(g_game.getLocalPlayer():getPosition(), false)
+		for _, creature in pairs(spectators) do
+			if creature:getName() == name then
+				target = creature
+				break
+			end
+		end
+		
 		if target then
 			for _, friendHealing in pairs(m_HelperList.friendHealingSlots) do
 				if friendHealing.checkBox:isChecked() then
@@ -330,16 +382,14 @@ m_HelperFunction.timerEvent = function()
 	local flags = 0
 	local itemId = 0
 	if m_HelperList.autoEatFoodCheckBox:isChecked() then
-		-- Auto eat food
 		if localPlayer:getRegenerationTime() < 60 then
 			flags = flags + 1
 		end
 	end
 
 	if m_HelperList.enableExerciseTrainingCheckBox:isChecked() then
-		-- Exercise weapon
 		if m_HelperList.exerciseTrainingSlot.type == m_HelperFunction.TYPE.ITEM then
-			itemId = m_HelperList.exerciseTrainingSlot.itemid
+			itemId = m_HelperList.exerciseTrainingSlot.itemId
 			flags = flags + 2
 		end
 	end
@@ -363,7 +413,7 @@ m_HelperFunction.openHealingPanel = function()
 	m_HelperList.toolsButton:setOn(false)
 	m_HelperList.healingButton:setOn(true)
 
-	local vocationId = 3--g_game.getLocalPlayer():getVocation()
+	local vocationId = g_game.getLocalPlayer():getVocation()
 	local height = m_HelperFunction.heightByVocation[vocationId]
 	m_HelperList.potionHealingSlot[3]:hide()
 	m_HelperList.friendHealingPanel:setOn(false)
@@ -487,10 +537,15 @@ m_HelperFunction.assignSpell = function(self, parent)
 	end
 
 	local vocationId = m_HelperFunction.translateVocation(g_game.getLocalPlayer():getVocation())
+	
 	for i = 1, #spellsList do
 		local spellName = spellsList[i]
 		local spellData = spells[spellName]
-		if table.find(spellData.vocations, vocationId) then
+		if not spellData then
+		else 
+		end
+
+		if spellData and table.find(spellData.vocations, vocationId) then
 			local widget = g_ui.createWidget("SpellPreview", list)
 			m_HelperList.radio:addWidget(widget)
 			widget:setId(spellData.id)

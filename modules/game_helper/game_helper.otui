@@ -22,6 +22,9 @@ HelperFriendListLabel < UILabel
   $focus:
     background-color: #ffffff22
 
+  $!focus:
+    background-color: alpha
+
 HelperLabel < Label
   color: #C0C0C0
 
@@ -207,7 +210,7 @@ MainWindow
       margin-top: 4
       margin-right: 18
       padding: 1
-      focusable: false
+      focusable: true
       vertical-scrollbar: friendsScrollBar
 
     VerticalScrollBar
