@@ -391,7 +391,10 @@ void ProtocolGame::sendBuyItem(int itemId, int subType, int amount, bool ignoreC
     msg->addU8(Proto::ClientBuyItem);
     msg->addU16(itemId);
     msg->addU8(subType);
-    msg->addU8(amount);
+    if(g_game.getProtocolVersion() >= 1100 || g_game.getFeature(Otc::GameDoubleShopSellAmount))
+        msg->addU16(amount);
+    else
+        msg->addU8(amount);
     msg->addU8(ignoreCapacity ? 0x01 : 0x00);
     msg->addU8(buyWithBackpack ? 0x01 : 0x00);
     send(msg);
@@ -403,7 +406,7 @@ void ProtocolGame::sendSellItem(int itemId, int subType, int amount, bool ignore
     msg->addU8(Proto::ClientSellItem);
     msg->addU16(itemId);
     msg->addU8(subType);
-    if(g_game.getFeature(Otc::GameDoubleShopSellAmount))
+    if(g_game.getProtocolVersion() >= 1100 || g_game.getFeature(Otc::GameDoubleShopSellAmount))
         msg->addU16(amount);
     else
         msg->addU8(amount);

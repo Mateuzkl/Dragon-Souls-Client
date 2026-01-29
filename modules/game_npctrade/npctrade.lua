@@ -551,6 +551,9 @@ function formatCurrency(amount)
 end
 
 function getMaxAmount()
+  if g_game.getFeature(GameCountU16) then
+    return 10000
+  end
   if getCurrentTradeType() == SELL and g_game.getFeature(GameDoubleShopSellAmount) then
     return 10000
   end
