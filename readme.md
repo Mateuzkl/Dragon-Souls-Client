@@ -117,8 +117,15 @@ Para dúvidas técnicas ou suporte direto:
 
 ---
 
+## 🏆 Créditos
+
+### Desenvolvimento Principal
+- **[@Mateuzkl](https://github.com/Mateuzkl)** - Desenvolvedor Principal
+
+---
+
 <div align="center">
 
-**Dragon Souls RPG Team**
+**Desenvolvido por Mateuzkl**
 
 </div>
