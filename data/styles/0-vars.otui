@@ -2,3 +2,8 @@
 $var-font: verdana-11px-antialised
 $var-text-color: #dfdfdf
 $var-text-color-disabled: #dfdfdf88
+
+// CipSoft style
+$var-cip-font: verdana-11px-antialised
+$var-text-cip-color: #C0C0C0
+$var-text-cip-color-highlight: #FFFFFF

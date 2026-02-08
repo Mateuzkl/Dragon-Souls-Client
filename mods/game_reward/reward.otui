@@ -1,0 +1,150 @@
+RewardButton < UIButton
+  size: 50 50
+  image-source: /images/ui/menubox
+  opacity: 0.9
+  image-border: 10
+  anchors.bottom: parent.bottom
+  anchors.right: parent.right
+  margin-bottom: 10
+  margin-right: 10
+  phantom: false
+  @onClick: modules.game_reward.toggle()
+  
+  UIWidget
+    id: animatedIcon
+    anchors.centerIn: parent
+    size: 50 50
+    image-source: images/purchasecomplete_pressed
+    image-clip: 0 0 108 108
+    phantom: true
+
+  UIWidget
+    id: highlight
+    anchors.fill: parent
+    image-source: /images/store/rectangle-highlight
+    image-border: 10
+    opacity: 0.0
+    phantom: true
+
+  $pressed:
+    icon-offset: 1 1
+    image-source: /images/ui/menubox
+    opacity: 0.8
+
+RewardItemWidget < UIWidget
+  size: 66 66
+  image-source: /images/ui/item
+  clipping: false
+
+  UIItem
+    id: item
+    anchors.fill: parent
+    virtual: true
+    phantom: true
+
+  UIWidget
+    id: selected
+    anchors.fill: parent
+    image-source: /images/ui/rarity_gold
+    visible: false
+    phantom: true
+    
+    UIWidget
+      image-source: images/icon-yes
+      anchors.top: parent.top
+      anchors.right: parent.right
+      margin-top: 5
+      margin-right: 5
+
+RewardWindow < UIWindow
+  size: 600 200
+  anchors.centerIn: parent
+  image-source: /images/ui/menubox
+  image-border: 5
+  padding: 5
+  @onEscape: modules.game_reward.hide()
+
+  Label
+    id: instructionLabel
+    anchors.top: parent.top
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-top: 25
+    !text: tr('Select your bonus exercise weapon\nChoose one exercise weapon with 5000 charged bound on your character')
+    text-align: center
+    font: $var-cip-font
+    color: $var-text-cip-color
+    size: 580 40
+    text-wrap: true
+
+  Panel
+    id: rewardGrid
+    anchors.top: parent.top
+    anchors.left: parent.left
+    margin-left: 70
+    margin-top: 78
+    size: 530 80
+    clipping: false
+    layout:
+      type: grid
+      cell-size: 66 66
+      cell-spacing: 9
+      num-lines: 1
+      flow: true
+      fit-children: true
+
+  Label
+    id: recommendedLabel
+    text: Recommended
+    color: #00FF00
+    font: cipsoftFont
+    text-align: center
+    text-auto-resize: true
+    anchors.top: parent.top
+    anchors.left: parent.left
+    visible: false
+
+  HorizontalSeparator
+    id: separator
+    anchors.top: rewardGrid.bottom
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-top: 16
+    size: 528 2
+
+  UIWidget
+    image-source: images/backdrop_crest.png
+    anchors.bottom: parent.top
+    anchors.horizontalCenter: parent.horizontalCenter
+    margin-bottom: -20
+
+  Button
+    id: close
+    anchors.top: separator.bottom
+    anchors.right: parent.right
+    margin-top: 10
+    margin-right: 16
+    !text: tr('Cancel')
+    font: cipsoftFont
+    color: $var-text-cip-color-highlight
+    size: 50 20
+    @onClick: modules.game_reward.hide()
+
+  Button
+    id: claim
+    anchors.top: separator.bottom
+    anchors.right: close.left
+    margin-top: 9
+    margin-right: 5
+    !text: tr('Confirm')
+    font: cipsoftFont
+    color: $var-text-cip-color-highlight
+    size: 63 20
+    image-source: images/buttons-blue
+    image-clip: 0 0 43 20
+    @onClick: modules.game_reward.claim()
+    $pressed:
+      image-clip: 0 20 43 20
+
+
+
+RewardWindow
+  id: rewardWindow

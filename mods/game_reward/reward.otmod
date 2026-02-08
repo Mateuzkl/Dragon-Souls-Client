@@ -1,0 +1,12 @@
+Module
+  name: game_reward
+  description: Daily Reward System
+  author: ClaudeAI
+  website: www.otclient.info
+  sandboxed: true
+  autoload: true
+  autoload-priority: 1000
+  dependencies: [ game_interface ]
+  scripts: [ reward ]
+  @onLoad: init()
+  @onUnload: terminate()
