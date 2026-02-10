@@ -191,7 +191,7 @@ function updateFeatures(version)
     if(version >= 1100) then
         g_game.enableFeature(GamePrey)    
         g_game.enableFeature(GameMagicEffectU16)
-        --g_game.enableFeature(GameDisplayItemDuration)
+        g_game.enableFeature(GameDisplayItemDuration)
 		g_game.enableFeature(GameSpritesAlphaChannel)
 		g_game.enableFeature(GameDistanceEffectU16)
 		g_game.enableFeature(GameChangeMapAwareRange)
