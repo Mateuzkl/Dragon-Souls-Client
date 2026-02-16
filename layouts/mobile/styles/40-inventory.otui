@@ -72,6 +72,13 @@ AmmoSlot < InventoryItem
   $on:
     image-source: /images/game/slots/ammo-blessed
 
+Ring2Slot < InventoryItem
+  id: slot12
+  image-source: /images/game/slots/ring2
+  &position: {x=65535, y=12, z=0}
+  $on:
+    image-source: /images/game/slots/ring2-blessed
+
 PurseButton < UIButton
   id: purseButton
   size: 34 12
@@ -126,7 +133,7 @@ MountButton < CombatBox
 
 InventoryWindow < MiniWindow
   icon: /images/topbuttons/inventory
-  height: 200
+  height: 230
   id: inventoryWindow
   @onClose: modules.game_inventory.onMiniWindowClose()
   &save: true
@@ -176,6 +183,11 @@ InventoryWindow < MiniWindow
         anchors.top: prev.bottom
         anchors.horizontalCenter: prev.horizontalCenter
         margin-top: 3
+
+      Ring2Slot
+        anchors.top: prev.bottom
+        anchors.horizontalCenter: prev.horizontalCenter
+        margin-top: 3
         
       BackSlot
         anchors.top: slot1.top
@@ -197,11 +209,13 @@ InventoryWindow < MiniWindow
         id: soulLabel
         anchors.top: slot10.bottom
         anchors.horizontalCenter: slot10.horizontalCenter
+        margin-top: 2
         
       SoulCapLabel
         id: capLabel
-        anchors.top: slot9.bottom
-        anchors.horizontalCenter: slot9.horizontalCenter
+        anchors.top: soulLabel.bottom
+        anchors.horizontalCenter: slot10.horizontalCenter
+        margin-top: 2
 
       PurseButton
         anchors.left: slot3.left
@@ -214,10 +228,10 @@ InventoryWindow < MiniWindow
           type: horizontalBox
         height: 22
         padding: 2
-        anchors.top: slot8.bottom
+        anchors.top: slot12.bottom
         anchors.left: slot6.left
         anchors.right: slot5.right
-        margin-top: 4
+        margin-top: 6
         border-width: 1
         border-color: #00000077
         background-color: #ffffff22

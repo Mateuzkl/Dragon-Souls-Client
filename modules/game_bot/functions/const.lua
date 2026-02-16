@@ -21,5 +21,9 @@ context.InventorySlotFeet = 8
 context.InventorySlotFinger = 9
 context.InventorySlotAmmo = 10
 context.InventorySlotPurse = 11
+context.InventorySlotRing2 = 12
+-- Temporary commented - Uncomment when ready to use Wing and Aura slots
+-- context.InventorySlotWing = 13
+-- context.InventorySlotAura = 14
 context.InventorySlotFirst = 1
-context.InventorySlotLast = 10
+context.InventorySlotLast = 12  -- Change to 13 or 14 when Wing/Aura slots are enabled

@@ -33,9 +33,13 @@ InventorySlotFeet = 8
 InventorySlotFinger = 9
 InventorySlotAmmo = 10
 InventorySlotPurse = 11
+InventorySlotRing2 = 12
+-- Temporary commented - Uncomment when ready to use Wing and Aura slots
+-- InventorySlotWing = 13
+-- InventorySlotAura = 14
 
 InventorySlotFirst = 1
-InventorySlotLast = 10
+InventorySlotLast = 12  -- Change to 13 or 14 when Wing/Aura slots are enabled
 
 function Player:isPartyLeader()
   local shield = self:getShield()

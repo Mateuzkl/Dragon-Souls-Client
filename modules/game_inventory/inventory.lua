@@ -27,7 +27,11 @@ InventorySlotStyles = {
   [InventorySlotLeg] = "LegSlot",
   [InventorySlotFeet] = "FeetSlot",
   [InventorySlotFinger] = "FingerSlot",
-  [InventorySlotAmmo] = "AmmoSlot"
+  [InventorySlotAmmo] = "AmmoSlot",
+  [InventorySlotRing2] = "Ring2Slot"
+  -- Temporary commented - Uncomment when ready to use Wing and Aura slots
+  -- [InventorySlotWing] = "WingSlot",
+  -- [InventorySlotAura] = "AuraSlot"
 }
 
 inventoryWindow = nil
@@ -188,15 +192,15 @@ end
 
 function refresh()
   local player = g_game.getLocalPlayer()
-  for i = InventorySlotFirst, InventorySlotPurse do
+  for i = InventorySlotFirst, InventorySlotLast do
     if g_game.isOnline() then
       onInventoryChange(player, i, player:getInventoryItem(i))
     else
       onInventoryChange(player, i, nil)
     end
-    toggleAdventurerStyle(player and Bit.hasBit(player:getBlessings(), Blessings.Adventurer) or false)
   end
   if player then
+    toggleAdventurerStyle(player and Bit.hasBit(player:getBlessings(), Blessings.Adventurer) or false)
     onSoulChange(player, player:getSoul())
     onFreeCapacityChange(player, player:getFreeCapacity())
     onStatesChange(player, player:getStates(), 0)
@@ -226,7 +230,7 @@ function onMiniWindowClose()
 end
 
 function onInventoryChange(player, slot, item, oldItem)
-	if InventorySlotPurse < slot then
+	if slot > InventorySlotLast then
 		return
 	end
 
