@@ -216,3 +216,30 @@ MiniWindow
       SkillNameLabel
         !text: tr('Mana Leech Amount')
       SkillValueLabel
+    SmallSkillButton
+      id: dodge
+      height: 15
+      SkillNameLabel
+        !text: tr('Dodge')
+      SkillValueLabel
+
+    SmallSkillButton
+      id: incPhys
+      height: 15
+      SkillNameLabel
+        !text: tr('Inc.Phys')
+      SkillValueLabel
+
+    SmallSkillButton
+      id: incMagic
+      height: 15
+      SkillNameLabel
+        !text: tr('Inc.Magic')
+      SkillValueLabel
+
+    SmallSkillButton
+      id: absAll
+      height: 15
+      SkillNameLabel
+        !text: tr('Abs.ALL')
+      SkillValueLabel

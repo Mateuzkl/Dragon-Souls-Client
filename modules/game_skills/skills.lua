@@ -25,6 +25,8 @@ function init()
     onGameEnd = offline
   })
 
+  ProtocolGame.registerExtendedOpcode(106, onEquipmentStatsExtended)
+
   skillsButton = modules.client_topmenu.addRightGameToggleButton('skillsButton', tr('Skills'), '/images/topbuttons/skills', toggle, false, 1)
   skillsButton:setOn(true)
   skillsWindow = g_ui.loadUI('skills', modules.game_interface.getRightPanel())
@@ -56,6 +58,8 @@ function terminate()
     onGameStart = refresh,
     onGameEnd = offline
   })
+
+  ProtocolGame.unregisterExtendedOpcode(106)
 
   skillsWindow:destroy()
   skillsButton:destroy()
@@ -227,10 +231,13 @@ function refresh()
   local contentsPanel = skillsWindow:getChildById('contentsPanel')
   skillsWindow:setContentMinimumHeight(44)
   if hasAdditionalSkills then
-    skillsWindow:setContentMaximumHeight(480)
+    skillsWindow:setContentMaximumHeight(540)
   else
-    skillsWindow:setContentMaximumHeight(390)
+    skillsWindow:setContentMaximumHeight(450)
   end
+
+  -- Update equipment stats
+  updateEquipmentStats()
 end
 
 function offline()
@@ -442,4 +449,40 @@ function onBaseSkillChange(localPlayer, id, baseLevel)
   end
   
   setSkillBase('skillId'..id, localPlayer:getSkillLevel(id), baseLevel)
+end
+
+
+local equipmentStats = {
+  dodge = 0,
+  incPhys = 0,
+  incMagic = 0,
+  absAll = 0
+}
+
+function updateEquipmentStats(stats)
+  if not stats then
+    -- Reset to 0 if no stats provided
+    setSkillValue('dodge', '0')
+    setSkillValue('incPhys', '0')
+    setSkillValue('incMagic', '0')
+    setSkillValue('absAll', '0')
+    return
+  end
+
+  equipmentStats = stats
+
+  -- Update the UI
+  setSkillValue('dodge', stats.dodge > 0 and (stats.dodge .. '%') or '0')
+  setSkillValue('incPhys', stats.incPhys > 0 and ('+' .. stats.incPhys .. '%') or '0')
+  setSkillValue('incMagic', stats.incMagic > 0 and ('+' .. stats.incMagic .. '%') or '0')
+  setSkillValue('absAll', stats.absAll > 0 and ('+' .. stats.absAll .. '%') or '0')
+end
+
+function onEquipmentStatsExtended(protocol, opcode, buffer)
+  local status, data = pcall(function() return json.decode(buffer) end)
+  if not status or not data then
+    return
+  end
+
+  updateEquipmentStats(data)
 end
