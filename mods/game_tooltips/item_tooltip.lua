@@ -93,7 +93,8 @@ local implicits = {
   ["dodge_base"] = "Dodge",
   ["dodge_imbue"] = "Dodge (Imbue)",
   ["maxhp_p"] = "Max HP",
-  ["maxmp_p"] = "Max MP"
+  ["maxmp_p"] = "Max MP",
+  ["cap"] = "Capacity"
 }
 
 
@@ -121,7 +122,8 @@ local impPercent = {
   ["dodge_base"] = false,
   ["dodge_imbue"] = true,
   ["maxhp_p"] = true,
-  ["maxmp_p"] = true
+  ["maxmp_p"] = true,
+  ["cap"] = false
 }
 
 
@@ -249,7 +251,9 @@ function newTooltip(data)
     reflect = data.reflect,
     dodge = data.dodge,
     tierAbility = data.tierAbility,
+    weaponClass = data.weaponClass,
     reqLvl = _requiredLevel,
+    reqReset = data.reqReset,
     itemId = _itemId
   }
 
@@ -428,9 +432,26 @@ function buildItemTooltip(item)
     addString("iLvl " .. iLvl, Colors.ItemLevel)
   end
 
+  if item.weaponClass then
+    addEmpty(5)
+    addString("Class " .. item.weaponClass.class .. ": " .. item.weaponClass.description, "#FF1493") -- Deep pink
+    if item.weaponClass.suitability then
+      addEmpty(2)
+      addString(item.weaponClass.suitability, "#87CEEB") -- Sky blue
+    end
+    if item.weaponClass.powerAnalysis then
+      addEmpty(2)
+      addString(item.weaponClass.powerAnalysis, "#FFD700") -- Gold
+    end
+  end
+
 
   if reqLvl > 0 then
     addString("Req. Level " .. reqLvl, Colors.ReqLevel)
+  end
+
+  if item.reqReset and item.reqReset > 0 then
+    addString("Req. Reset " .. item.reqReset, Colors.ReqLevel)
   end
 
 
