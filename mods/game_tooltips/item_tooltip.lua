@@ -1,5 +1,6 @@
 local CODE_TOOLTIPS = 105
 
+
 local tooltipWindow = nil
 local itemSprite = nil
 local itemWeightLabel = nil
@@ -10,15 +11,19 @@ local protocolGame = nil
 local showingVirtual = nil
 local hoveredLinked = nil
 
+
 local BASE_WIDTH = 170
 local BASE_HEIGHT = 0
+
 
 local tooltipWidth = 0
 local tooltipWidthBase = BASE_WIDTH
 local tooltipHeight = BASE_HEIGHT
 local longestString = 0
 
+
 local cachedItems = {}
+
 
 local Colors = {
   Default = "#e0e0e0",
@@ -31,8 +36,16 @@ local Colors = {
   Attribute = "#5599ff",
   Mirrored = "#22ffbb",
   SectionHeader = "#808080",
-  Weight = "#909090"
+  Weight = "#909090",
+  Tier = "#FFA500",
+  Dodge = "#00CED1",
+  Reflect = "#FF6347",
+  Imbuement = "#FFD700",
+  Duration = "#36a0e6",
+  Charges = "#ffcc44",
+  TierAbility = "#FF69B4"
 }
+
 
 local rarityColor = {
   { name = "",          color = "#ffffff" },
@@ -43,6 +56,7 @@ local rarityColor = {
   { name = "Legendary", color = "#ff7605" },
   { name = "Mythic",    color = "#FF0000" }
 }
+
 
 local implicits = {
   ["ca"] = "Critical Damage",
@@ -74,8 +88,14 @@ local implicits = {
   ["a_all"] = "Abs.ALL",
   ["hpgain"] = "Regen.Life",
   ["mpgain"] = "Regen.Mana",
-  ["Inc_Magic"] = "Inc.Magic"
+  ["Inc_Magic"] = "Inc.Magic",
+  ["dodge"] = "Dodge Chance",
+  ["dodge_base"] = "Dodge",
+  ["dodge_imbue"] = "Dodge (Imbue)",
+  ["maxhp_p"] = "Max HP",
+  ["maxmp_p"] = "Max MP"
 }
+
 
 local impPercent = {
   ["ca"] = true,
@@ -96,17 +116,26 @@ local impPercent = {
   ["a_holy"] = true,
   ["a_death"] = true,
   ["a_all"] = true,
-  ["Inc_Magic"] = true
+  ["Inc_Magic"] = true,
+  ["dodge"] = true,
+  ["dodge_base"] = false,
+  ["dodge_imbue"] = true,
+  ["maxhp_p"] = true,
+  ["maxmp_p"] = true
 }
+
 
 function init()
   connect(UIItem, { onHoverChange = onHoverChange })
   connect(g_game, { onGameEnd = resetData })
 
+
   ProtocolGame.registerExtendedOpcode(CODE_TOOLTIPS, onExtendedOpcode)
+
 
   tooltipWindow = g_ui.displayUI("item_tooltip")
   tooltipWindow:hide()
+
 
   labels = tooltipWindow:getChildById("labels")
   itemWeightLabel = tooltipWindow:getChildById("itemWeightLabel")
@@ -117,7 +146,9 @@ function terminate()
   disconnect(UIItem, { onHoverChange = onHoverChange })
   disconnect(g_game, { onGameEnd = resetData })
 
+
   ProtocolGame.unregisterExtendedOpcode(CODE_TOOLTIPS, onExtendedOpcode)
+
 
   if tooltipWindow then
     cachedItems = {}
@@ -127,9 +158,11 @@ function terminate()
     showingVirtual = nil
     hoveredLinked = nil
 
+
     itemWeightLabel = nil
     itemSprite = nil
     labels = nil
+
 
     tooltipWindow:destroy()
     tooltipWindow = nil
@@ -144,10 +177,12 @@ function onExtendedOpcode(protocol, code, buffer)
         end
       )
 
+
   if not json_status then
     g_logger.error("Tooltips JSON error: " .. json_data)
     return
   end
+
 
   local action = json_data.action
   local data = json_data.data
@@ -174,6 +209,7 @@ function newTooltip(data)
   local _itemMaxAttributes = data.maxAttr or 0
   local _itemAttributes = data.attr
   local _requiredLevel = data.reqLvl or 0
+
 
   if _itemRarity ~= 0 then
     for i = _itemMaxAttributes, 1, -1 do
@@ -205,9 +241,18 @@ function newTooltip(data)
     second = _secondStat,
     third = _thirdStat,
     weight = _weight,
+    duration = data.duration,
+    charges = data.charges,
+    tier = data.tier,
+    classification = data.classification,
+    imbuements = data.imbuements,
+    reflect = data.reflect,
+    dodge = data.dodge,
+    tierAbility = data.tierAbility,
     reqLvl = _requiredLevel,
     itemId = _itemId
   }
+
 
   if hoveredLinked and _itemUId == hoveredLinked.uid then
     hoveredLinked.cached = true
@@ -217,6 +262,7 @@ function newTooltip(data)
     buildItemTooltip(hoveredLinked:getLinkedTooltip())
     return
   end
+
 
   if hoveredItem and _itemId == hoveredItem:getId() then
     hoveredItem.uid = _itemUId
@@ -241,6 +287,7 @@ function onHoverChange(widget, hovered)
     protocolGame = g_game.getProtocolGame()
   end
 
+
   if widget.getLinkedTooltip then
     hoveredLinked = widget
     if not widget.cached then
@@ -259,6 +306,7 @@ function onHoverChange(widget, hovered)
     return
   end
 
+
   local item = widget:getItem()
   if item and widget.getItemTooltip then
     if hovered then
@@ -272,9 +320,11 @@ function onHoverChange(widget, hovered)
     return
   end
 
+
   if player == nil then
     player = g_game.getLocalPlayer()
   end
+
 
   if hovered then
     hoveredItem = item
@@ -291,8 +341,10 @@ end
 function showTooltip(uid)
   local cachedItem = cachedItems[uid]
 
+
   cachedItem.id = hoveredItem:getId()
   cachedItem.count = hoveredItem:getCount()
+
 
   buildItemTooltip(cachedItem)
 end
@@ -305,7 +357,9 @@ function buildItemTooltip(item)
   tooltipWindow:setWidth(tooltipWidth)
   tooltipWindow:setHeight(tooltipHeight)
 
+
   labels:destroyChildren()
+
 
   local id = item.id
   local name = item.name
@@ -324,10 +378,13 @@ function buildItemTooltip(item)
   local third = item.third
   local weight = item.weight
 
+
   itemWeightLabel:setText(formatWeight(weight))
+
 
   itemSprite:setItemId(id)
   itemSprite:setItemCount(count)
+
 
   local itemNameColor
   if unidentified then
@@ -340,6 +397,7 @@ function buildItemTooltip(item)
     itemNameColor = "#ffffff"
   end
 
+
   name =
       name:gsub(
         "(%a)(%a+)",
@@ -350,6 +408,7 @@ function buildItemTooltip(item)
   if item.uLvl > 0 then
     name = name .. " +" .. item.uLvl
   end
+
 
   if unidentified then
     addString("Unidentified" .. " " .. name, rarityColor[2].color)
@@ -364,13 +423,16 @@ function buildItemTooltip(item)
   end
   --addString(name, itemNameColor)
 
+
   if iLvl > 0 then
     addString("iLvl " .. iLvl, Colors.ItemLevel)
   end
 
+
   if reqLvl > 0 then
     addString("Req. Level " .. reqLvl, Colors.ReqLevel)
   end
+
 
   local firstText, secondText, thirdText
   if (type == "Armor" or type == "Helmet" or type == "Legs" or type == "Ring" or type == "Necklace" or type == "Boots") and first ~= 0 then
@@ -385,18 +447,19 @@ function buildItemTooltip(item)
     firstText = "Defense: " .. second
   end
 
+
   if type == "Two-Handed Sword" or type == "Two-Handed Club" or type == "Two-Handed Axe" or type == "Sword" or type == "Club" or type == "Axe" or type == "Fist" then
     secondText = "Defense: " .. second
   elseif type == "Distance" then
     secondText = "Hit Chance: +" .. second .. "%"
   end
 
+
   if type == "Two-Handed Sword" or type == "Two-Handed Club" or type == "Two-Handed Axe" or type == "Sword" or type == "Club" or type == "Axe" or type == "Fist" then
     thirdText = "Extra-Defense: " .. third
   elseif type == "Distance" then
     thirdText = "Shoot Range: " .. third
   end
-
 
 
   if (firstText and (type == "Shield" or type == "Ring" or type == "Necklace")) or (first ~= 0 and second == 0 and third == 0) then
@@ -416,6 +479,80 @@ function buildItemTooltip(item)
     addString(thirdText, Colors.Default)
   end
 
+
+  if item.duration and item.duration > 0 then
+    addSeparator()
+    addEmpty(5)
+    addString("Duration: " .. formatTime(math.floor(item.duration / 1000)), Colors.Duration)
+  end
+
+
+  if item.charges and item.charges > 0 then
+    addSeparator()
+    addEmpty(5)
+    addString("Charges: " .. item.charges, Colors.Charges)
+  end
+
+  if item.tier or item.classification then
+    addSeparator()
+    addEmpty(5)
+    local tierName = "Tier: " .. (item.tier or 0)
+    if item.classification then
+      -- Map classification ID to name if needed, assuming 0=Base, 1=Improved, 2=Exalted
+      local classNames = { [0] = "Base", [1] = "Improved", [2] = "Exalted" }
+      if classNames[item.classification] then
+        tierName = tierName .. " (" .. classNames[item.classification] .. ")"
+      else
+        tierName = tierName .. " (Class " .. item.classification .. ")"
+      end
+    end
+    addString(tierName, Colors.Tier)
+  end
+
+  if item.tierAbility then
+    addEmpty(5)
+    local abilityText = item.tierAbility.name
+    if item.tierAbility.chance then
+      abilityText = abilityText .. " (" .. item.tierAbility.chance .. "%)"
+    elseif item.tierAbility.dropBoost then
+      abilityText = abilityText .. " (+" .. item.tierAbility.dropBoost .. "% Drop)"
+    end
+    addString(abilityText, Colors.TierAbility)
+    if item.tierAbility.description then
+      addEmpty(2)
+      addString("  " .. item.tierAbility.description, Colors.Default, true)
+    end
+  end
+
+  if item.reflect and #item.reflect > 0 then
+    addSeparator()
+    addEmpty(5)
+    addString("Reflect:", Colors.Reflect)
+    for _, reflect in ipairs(item.reflect) do
+      addEmpty(2)
+      addString("  " .. reflect.name .. ": " .. reflect.percent .. "% (Chance: " .. reflect.chance .. "%)", Colors.Default)
+    end
+  end
+
+  if item.imbuements and #item.imbuements > 0 then
+    addSeparator()
+    addEmpty(5)
+    addString("Imbuements:", Colors.Imbuement)
+    for i, imbueData in ipairs(item.imbuements) do
+      addEmpty(2)
+      local slotText = "Slot " .. i .. ": "
+      if imbueData == 0 then
+        slotText = slotText .. "Empty"
+        addString("  " .. slotText, "#808080") -- Gray for empty
+      else
+        -- imbueData is the name string from server (e.g., "Scorch (Basic)")
+        slotText = slotText .. imbueData
+        addString("  " .. slotText, "#FFFFFF")
+      end
+    end
+  end
+
+
   if item.imp then
     local hasImp = false
     for key, value in pairs(item.imp) do
@@ -427,8 +564,11 @@ function buildItemTooltip(item)
     end
     if hasImp then
       addSeparator()
+      addEmpty(5)
+      addString("Attributes:", Colors.Imbuement)
       addEmpty(3)
     end
+
 
     for key, value in pairs(item.imp) do
       -- Skip zero or nil values
@@ -437,19 +577,22 @@ function buildItemTooltip(item)
         goto continue
       end
 
+
       local impText
       if not implicits[key] then
         impText = tostring(value)
       else
         -- Ensure value is a number before comparison
-        impText = implicits[key] .. " " .. (numValue > 0 and "+" or "") .. numValue .. (impPercent[key] and "%" or "")
+        impText = "  " .. implicits[key] .. " " .. (numValue > 0 and "+" or "") .. numValue .. (impPercent[key] and "%" or "")
       end
       addString(impText, Colors.Implicit)
+
 
       ::continue::
     end
     if hasImp then end
   end
+
 
   if item.rarity ~= 0 then
     addSeparator()
@@ -459,15 +602,18 @@ function buildItemTooltip(item)
     end
   end
 
+
   if mirrored then
     addEmpty(5)
     addString("Mirrored", Colors.Mirrored)
   end
 
+
   if desc and desc:len() > 0 then
     addEmpty(5)
     addString(desc, Colors.Description, true)
   end
+
 
   shrinkSeparators()
   showItemTooltip()
@@ -476,6 +622,7 @@ end
 function addString(text, color, resize)
   local label = g_ui.createWidget("TooltipLabel", labels)
   label:setColor(color)
+
 
   if resize then
     tooltipWindow:setWidth(tooltipWidth)
@@ -526,6 +673,7 @@ function showItemTooltip()
   tooltipWindow:setWidth(tooltipWidth)
   tooltipWindow:setHeight(tooltipHeight)
 
+
   local windowSize = g_window.getSize()
   if mousePos.x > windowSize.width / 2 then
     tooltipWindow:move(mousePos.x - (tooltipWidth + 2), math.min(windowSize.height - tooltipHeight, mousePos.y + 5))
@@ -540,6 +688,7 @@ end
 function formatWeight(weight)
   local ss
 
+
   if weight < 10 then
     ss = "0.0" .. weight
   elseif weight < 100 then
@@ -550,6 +699,17 @@ function formatWeight(weight)
     ss = weightString:sub(1, len - 2) .. "." .. weightString:sub(len - 1, len)
   end
 
+
   ss = ss .. " oz."
   return ss
+end
+
+function formatTime(seconds)
+  if seconds < 60 then
+    return seconds .. "s"
+  elseif seconds < 3600 then
+    return math.floor(seconds / 60) .. "m " .. (seconds % 60) .. "s"
+  else
+    return math.floor(seconds / 3600) .. "h " .. math.floor((seconds % 3600) / 60) .. "m"
+  end
 end
