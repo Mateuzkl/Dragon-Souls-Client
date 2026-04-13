@@ -58,7 +58,15 @@ void Tile::drawGround(const Point& dest, LightView* lightView)
         if (thing->isHidden())
             continue;
 
-        thing->draw(dest - m_drawElevation * g_sprites.getOffsetFactor(), true, lightView);
+        if (g_game.getFeature(Otc::GameMapDrawGroundFirst) || g_game.getFeature(Otc::GameNegativeOffset)) {
+            // Draw ONLY flat ground in Pass 1. Tall grounds and overlapping fringes go to Pass 2.
+            bool isFlatGround = thing->isGround() && thing->getWidth() == 1 && thing->getHeight() == 1 && !thing->hasDisplacement();
+            if (isFlatGround) {
+                thing->draw(dest - m_drawElevation * g_sprites.getOffsetFactor(), true, lightView);
+            }
+        } else {
+            thing->draw(dest - m_drawElevation * g_sprites.getOffsetFactor(), true, lightView);
+        }
         m_drawElevation = std::min<uint8_t>(m_drawElevation + thing->getElevation(), Otc::MAX_ELEVATION);
     }
 }
@@ -70,18 +78,25 @@ void Tile::drawBottom(const Point& dest, LightView* lightView)
 
     // bottom things, only when GameMapDrawGroundFirst or GameNegativeOffset is active
     if (g_game.getFeature(Otc::GameMapDrawGroundFirst) || g_game.getFeature(Otc::GameNegativeOffset)) {
-        bool afterBottom = false;
+       uint8_t pass2Elevation = 0;
         for (const ThingPtr& thing : m_things) {
-            if (thing->isOnBottom())
-                afterBottom = true;
+            // Break exactly where regular tile drawing would stop (before common items/creatures)
             if (!thing->isGround() && !thing->isGroundBorder() && !thing->isOnBottom())
                 break;
-            if (thing->isHidden() || !afterBottom)
+             if (thing->isHidden())
                 continue;
 
-            thing->draw(dest - m_drawElevation * g_sprites.getOffsetFactor(), true, lightView);
-            m_drawElevation = std::min<uint8_t>(m_drawElevation + thing->getElevation(), Otc::MAX_ELEVATION);
+                bool isFlatGround = thing->isGround() && thing->getWidth() == 1 && thing->getHeight() == 1 && !thing->hasDisplacement();
+            
+            // Skip flat grounds in Pass 2 because they were already physically drawn in Pass 1!
+            if (!isFlatGround) {
+                // Draw Tall Grounds (Mountain Fringes) and isOnBottom (Walls) in Pass 2!
+                thing->draw(dest - pass2Elevation * g_sprites.getOffsetFactor(), true, lightView);
+            }
+
+            pass2Elevation = std::min<uint8_t>(pass2Elevation + thing->getElevation(), Otc::MAX_ELEVATION);
         }
+        m_drawElevation = pass2Elevation;
     }
 
     // common items, reverse order
