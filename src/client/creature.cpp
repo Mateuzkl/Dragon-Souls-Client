@@ -542,8 +542,18 @@ void Creature::updateWalkingTile()
     // determine new walking tile
     TilePtr newWalkingTile;
 
-    Rect virtualCreatureRect(g_sprites.spriteSize() + (m_walkOffset.x - getDisplacementX()),
-        g_sprites.spriteSize() + (m_walkOffset.y - getDisplacementY()),
+    int walkDispX, walkDispY;
+    if (m_outfit.getMount() != 0 && !g_game.getFeature(Otc::GameNegativeOffset)) {
+        // Without NegativeOffset, use player's own displacement (not mount's)
+        walkDispX = Thing::getDisplacementX() * g_sprites.getOffsetFactor();
+        walkDispY = Thing::getDisplacementY() * g_sprites.getOffsetFactor();
+    } else {
+        walkDispX = getDisplacementX();
+        walkDispY = getDisplacementY();
+    }
+
+    Rect virtualCreatureRect(g_sprites.spriteSize() + (m_walkOffset.x - walkDispX),
+        g_sprites.spriteSize() + (m_walkOffset.y - walkDispY),
         g_sprites.spriteSize(), g_sprites.spriteSize());
     for (int xi = -1; xi <= 1 && !newWalkingTile; ++xi) {
         for (int yi = -1; yi <= 1 && !newWalkingTile; ++yi) {

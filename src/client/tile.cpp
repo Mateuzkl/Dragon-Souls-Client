@@ -53,7 +53,7 @@ void Tile::drawGround(const Point& dest, LightView* lightView)
 
     // ground
     for (const ThingPtr& thing : m_things) {
-        if (!thing->isGround() && !thing->isGroundBorder() && (g_game.getFeature(Otc::GameMapDrawGroundFirst) || !thing->isOnBottom()))
+         if (!thing->isGround() && !thing->isGroundBorder() && (g_game.getFeature(Otc::GameMapDrawGroundFirst) || g_game.getFeature(Otc::GameNegativeOffset) || !thing->isOnBottom()))
             break;
         if (thing->isHidden())
             continue;
@@ -68,8 +68,8 @@ void Tile::drawBottom(const Point& dest, LightView* lightView)
     if (m_fill != Color::alpha)
         return;
 
-    // bottom things, only when GameMapDrawGroundFirst is active
-    if (g_game.getFeature(Otc::GameMapDrawGroundFirst)) {
+    // bottom things, only when GameMapDrawGroundFirst or GameNegativeOffset is active
+    if (g_game.getFeature(Otc::GameMapDrawGroundFirst) || g_game.getFeature(Otc::GameNegativeOffset)) {
         bool afterBottom = false;
         for (const ThingPtr& thing : m_things) {
             if (thing->isOnBottom())

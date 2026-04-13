@@ -152,7 +152,9 @@ void Outfit::draw(Point dest, Otc::Direction direction, uint walkAnimationPhase,
                 }
             }
 
-            dest -= mountType->getDisplacement() * g_sprites.getOffsetFactor();
+             if (!g_game.getFeature(Otc::GameNegativeOffset)) {
+                dest -= mountType->getDisplacement() * g_sprites.getOffsetFactor();
+            }
             if (type->hasBones() && mountType->hasBones()) {
                 auto mountDest = dest;
                 auto outfitBones = type->getBones(direction);
