@@ -567,6 +567,12 @@
     <ClCompile Include="..\src\framework\ui\uiflexbox.cpp">
       <Filter>Source Files\framework\ui</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\framework\qml\qmldocument.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\framework\qml\qmlparser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\framework\const.h">
@@ -1135,6 +1141,15 @@
     </ClInclude>
     <ClInclude Include="..\src\framework\ui\uiflexbox.h">
       <Filter>Header Files\framework\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\framework\qml\declarations.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\framework\qml\qmldocument.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\framework\qml\qmlparser.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
